@@ -49,10 +49,10 @@ if __name__ == "__main__":
     
 
     #An example track 
-    #track = Track(0, 0, np.pi/2.0, 0.1, 10, 1.0)
-    #tracker.fullMeasurement(track)
-    #valid = btl.fullMeasurement(track)
-    #track.plot_track(ax1, ax2, ax3, ax4, 'r')
+    track = Track(0, 0, np.pi/2.0, 0.1, 10, 1.0)
+    tracker.fullMeasurement(track)
+    track.plot_track(ax1, ax2, ax3, ax4, 'r')
+    track.plot_measurements(ax1, ax2, ax3, ax4, 'y*')
     #counter = 0
     #alist = []
     #while counter < 50:
