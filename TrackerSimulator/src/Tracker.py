@@ -108,7 +108,7 @@ class Tracker:
         elif theta < -np.pi:
             return theta + np.pi * 2.0
         return theta 
- 
+
   
     def intersection(self, track):
                   
@@ -278,6 +278,30 @@ class Tracker:
         self.makeMeasurement(track)
 
 
+    def createNoise(self, noise):
+
+        #The rate parameter determines the number of noise hits per layer/disk and event
+
+        #Noise in the barrel
+        x = []
+        y = []
+        z = []
+        for l in self.ri:
+            nNoiseHits = np.random.poission(noise.rate)
+            for n in range(nNoiseHits):
+                z.append(np.random.uniform(-self.zsize/2.0, self.zsize/2.0))
+                phi = np.random.uniform(0.0, 2.0*np.pi)
+                x.append(l * np.cos(phi))
+                y.append(l * np.sin(phi))
+        
+        #Noise in the endcaps
+        for z in self.zi:
+            nNoiseHits = np.random.poission(noise.rate)
+            for n in range(nNoiseHits):
+                z.append(np.random.uniform(-self.zsize/2.0, self.zsize/2.0))
+                phi = np.random.uniform(0.0, 2.0*np.pi)
+                x.append(l * np.cos(phi))
+                y.append(l * np.sin(phi))
 
         
   
