@@ -286,6 +286,7 @@ class Tracker:
         x = []
         y = []
         z = []
+        t = []
         for l in self.ri:
             nNoiseHits = np.random.poission(noise.rate)
             for n in range(nNoiseHits):
@@ -293,15 +294,21 @@ class Tracker:
                 phi = np.random.uniform(0.0, 2.0*np.pi)
                 x.append(l * np.cos(phi))
                 y.append(l * np.sin(phi))
+                t.append(np.random.uniform(0.0, 3.0))
         
         #Noise in the endcaps
-        for z in self.zi:
+        for thez in self.zi:
             nNoiseHits = np.random.poission(noise.rate)
             for n in range(nNoiseHits):
-                z.append(np.random.uniform(-self.zsize/2.0, self.zsize/2.0))
+                z.append(thez)
                 phi = np.random.uniform(0.0, 2.0*np.pi)
+                l = np.random.uniform(self.ri[0], self.ri[len(self.ri)-1])
                 x.append(l * np.cos(phi))
                 y.append(l * np.sin(phi))
+                t.append(np.random.uniform(0.0, 3.0))
 
-        
-  
+
+        noise.xm = np.concatenate((noise.xm, x), axis=0)
+        noise.ym = np.concatenate((noise.ym, y), axis=0)
+        noise.zm = np.concatenate((noise.zm, z), axis=0)
+        noise.tm = np.concatenate((noise.tm, t), axis=0)
