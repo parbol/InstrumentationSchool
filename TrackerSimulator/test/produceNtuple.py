@@ -78,7 +78,7 @@ if __name__ == "__main__":
             track = Track(0, 0, phi_, eta_, pt_, charge_)
             tracker.fullMeasurement(track)
 
-            hlayer.append(track.l)
+            hlayer.extend(track.l.tolist())
             htime.append(track.l)
             hindex.append(track.l)
 
