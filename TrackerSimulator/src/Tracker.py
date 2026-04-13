@@ -223,16 +223,18 @@ class Tracker:
         copyyi = np.copy(track.yi)
         copyzi = np.copy(track.zi)
         copyti = np.copy(track.ti)
+        l = np.asarray(self.getLayers(x, y, z, det), dtype=np.int32)
         track.xi = np.concatenate((track.xi, x), axis=0)
         track.yi = np.concatenate((track.yi, y), axis=0)
         track.zi = np.concatenate((track.zi, z), axis=0)
         track.ti = np.concatenate((track.ti, t), axis=0)
+        track.det = np.concatenate((track.det, det), axis=0)
+        track.l = np.concatenate((track.l, l), axis=0)
         #These are supposed to be the local coordinates
         #But they are not really implemented for this tracker
         track.lxi = np.concatenate((copyxi, x), axis=0)
         track.lyi = np.concatenate((copyyi, y), axis=0)
         track.lzi = np.concatenate((copyzi, z), axis=0)
-        track.det = det
         for i in range(0, len(det)):
             track.subdet.append([0, 0, 0, 0, 0])
 
@@ -270,7 +272,32 @@ class Tracker:
         track.lxm = np.concatenate((copyxm, x), axis=0)
         track.lym = np.concatenate((copyym, y), axis=0)
         track.lzm = np.concatenate((copyzm, z), axis=0)
-        
+
+
+    def getLayers(self, xa, ya, za, det):
+
+        layer = []
+        for i in range(len(xa)):
+            x = xa[i]
+            y = ya[i]
+            z = za[i]
+            if det[i] == 0:
+                for j, r in enumerate(self.ri):
+                    if abs(math.sqrt(x**2+y**2)-r) < 0.001:
+                        layer.append(j)
+            else:
+                if z > 0:
+                    for j, zd in enumerate(self.zp):
+                        if abs(z-zd) < 0.001:
+                            layer.append(len(self.ri) + j)
+                else:
+                    for j, zd in enumerate(self.zm):
+                        if abs(z-zd) < 0.001:
+                            layer.append(len(self.ri) + len(self.zp) + j)
+        return layer 
+
+
+
 
     def fullMeasurement(self, track):
 

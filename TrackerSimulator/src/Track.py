@@ -87,7 +87,8 @@ class Track:
         self.y_c = -self.rt * np.cos(phi) + self.y_cp
         
         #List of intersections and measurements
-        self.det = []
+        self.det = np.asarray([], dtype=np.int32)
+        self.l = np.asarray([], dtype=np.int32)
         self.subdet = []
         self.xi = np.asarray([])
         self.yi = np.asarray([])

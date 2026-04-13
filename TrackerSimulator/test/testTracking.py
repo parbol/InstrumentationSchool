@@ -53,6 +53,7 @@ if __name__ == "__main__":
     tracker.fullMeasurement(track)
     track.plot_track(ax1, ax2, ax3, ax4, 'r')
     track.plot_measurements(ax1, ax2, ax3, ax4, 'y*')
+    print(track.l)
     #counter = 0
     #alist = []
     #while counter < 50:
