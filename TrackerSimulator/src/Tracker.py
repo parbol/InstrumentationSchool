@@ -297,15 +297,13 @@ class Tracker:
         return layer 
 
 
-
-
     def fullMeasurement(self, track):
 
         self.makeIntersection(track)
         self.makeMeasurement(track)
 
 
-    def createNoise(self, noise):
+    def createNoiseBarrel(self, noise):
 
         #The rate parameter determines the number of noise hits per layer/disk and event
 
@@ -314,18 +312,37 @@ class Tracker:
         y = []
         z = []
         t = []
+        det = []
         for l in self.ri:
-            nNoiseHits = np.random.poission(noise.rate)
+            nNoiseHits = np.random.poisson(noise.rate)
             for n in range(nNoiseHits):
                 z.append(np.random.uniform(-self.zsize/2.0, self.zsize/2.0))
                 phi = np.random.uniform(0.0, 2.0*np.pi)
                 x.append(l * np.cos(phi))
                 y.append(l * np.sin(phi))
                 t.append(np.random.uniform(0.0, 3.0))
-        
+                det.append(0)
+                
+        l = np.asarray(self.getLayers(x, y, z, det), dtype=np.int32)
+
+        noise.xm = np.concatenate((noise.xm, x), axis=0)
+        noise.ym = np.concatenate((noise.ym, y), axis=0)
+        noise.zm = np.concatenate((noise.zm, z), axis=0)
+        noise.tm = np.concatenate((noise.tm, t), axis=0)
+        noise.l = np.concatenate((noise.l, l), axis=0)
+        noise.det = np.concatenate((noise.det, det), axis=0)
+
+    def createNoiseEndcap(self, noise):
+
+        #The rate parameter determines the number of noise hits per layer/disk and event
+        x = []
+        y = []
+        z = []
+        t = []
+        det = []
         #Noise in the endcaps
-        for thez in self.zi:
-            nNoiseHits = np.random.poission(noise.rate)
+        for thez in self.zp:
+            nNoiseHits = np.random.poisson(noise.rate)
             for n in range(nNoiseHits):
                 z.append(thez)
                 phi = np.random.uniform(0.0, 2.0*np.pi)
@@ -333,9 +350,23 @@ class Tracker:
                 x.append(l * np.cos(phi))
                 y.append(l * np.sin(phi))
                 t.append(np.random.uniform(0.0, 3.0))
-
+                det.append(1)
+        for thez in self.zm:
+            nNoiseHits = np.random.poisson(noise.rate)
+            for n in range(nNoiseHits):
+                z.append(thez)
+                phi = np.random.uniform(0.0, 2.0*np.pi)
+                l = np.random.uniform(self.ri[0], self.ri[len(self.ri)-1])
+                x.append(l * np.cos(phi))
+                y.append(l * np.sin(phi))
+                t.append(np.random.uniform(0.0, 3.0))
+                det.append(1)
+                
+        l = np.asarray(self.getLayers(x, y, z, det), dtype=np.int32)
 
         noise.xm = np.concatenate((noise.xm, x), axis=0)
         noise.ym = np.concatenate((noise.ym, y), axis=0)
         noise.zm = np.concatenate((noise.zm, z), axis=0)
         noise.tm = np.concatenate((noise.tm, t), axis=0)
+        noise.l = np.concatenate((noise.l, l), axis=0)
+        noise.det = np.concatenate((noise.det, det), axis=0)

@@ -7,6 +7,7 @@ import pandas as pd
 
 from TrackerSimulator.src.Tracker import Tracker
 from TrackerSimulator.src.Track import Track
+from TrackerSimulator.src.Noise import Noise
 
 
 def insert(a, b, N):
@@ -35,37 +36,34 @@ if __name__ == "__main__":
     sigma_z = 0.3
     tracker = Tracker(layers, layersz, sigma_rphi, sigma_z, 220.0, [0,0,0])
 
-    eventCounter = 0
-    phi = []
-    eta = []
-    pt = []
-    charge = []
-
+    #Dictionary to store events
     events = dict()
     events['phi'] = []
     events['eta'] = []
     events['pt'] = []
     events['charge'] = []
-    events['layer'] = []
-    events['time'] = []
-    events['index'] = []
-
-    while eventCounter < int(opts.nEvents):
-
-        if counter % 10000 == 0:
-            print(counter*100.0/int(opts.nTracks))
+    events['hlayer'] = []
+    events['hphi'] = []
+    events['hindex'] = []
     
+    
+    eventCounter = 0
+    while eventCounter < int(opts.nEvents):
+       
         tphi = []
         teta = []
         tpt = []
         tcharge = []
         hlayer = []
-        htime = []
+        hphi = []
         hindex = []
-        for j in range(opt.nTracks):
+        
+        trackCounter = 0
+        while trackCounter < int(opts.nTracks):
 
             phi_ = np.random.uniform(0, 2.0*np.pi)
-            eta_ = np.random.uniform(-1.7, 1.7)
+            #Eta is zero for this application
+            eta_ = np.random.uniform(0, 0)
             pt_ = np.random.triangular(15.0, 38, 50.0)
             if pt_ < 26 or pt_ > 50.0:
                 continue
@@ -74,29 +72,40 @@ if __name__ == "__main__":
             teta.append(eta_)
             tpt.append(pt_)
             tcharge.append(charge_)
-        
+            
             track = Track(0, 0, phi_, eta_, pt_, charge_)
             tracker.fullMeasurement(track)
-
+              
             hlayer.extend(track.l.tolist())
-            htime.append(track.l)
-            hindex.append(track.l)
+            hphi.extend(np.atan2(track.ym, track.xm).tolist())
+            hindex.extend([trackCounter for l in range(len(track.l))])
+            trackCounter = trackCounter + 1
 
-            #x.append(track.xm)
-            #y.append(track.ym)
-            #z.append(track.zm)
-            #l.append(l)
-            #t.append(t)
+        noise = Noise(1)    
+        tracker.createNoiseBarrel(noise)
+        hlayer.extend(noise.l.tolist())
+        hphi.extend(np.atan2(noise.ym, noise.xm).tolist())
+        hindex.extend([-1 for l in range(len(noise.l))])
+
         eventCounter = eventCounter + 1
         events['phi'].append(tphi)
         events['eta'].append(teta)
         events['pt'].append(tpt)
         events['charge'].append(tcharge)
-        events['layer'].append(hlayer)
-        events['time'].append(htime)
-        events['index'].append(hindex)
+        events['hlayer'].append(hlayer)
+        events['hphi'].append(hphi)
+        events['hindex'].append(hindex)
+
+    print('Phi', events['phi'])
+    print('Eta', events['eta'])
+    print('Pt', events['pt'])
+    print('hlayer', events['hlayer'])
+    print('hphi', events['hphi'])
+    print('hindex', events['hindex'])
+
 
     df = pd.DataFrame(events)
+    df.to_parquet(opts.outputFile)
 
     
 
