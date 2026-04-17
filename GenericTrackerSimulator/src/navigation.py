@@ -5,55 +5,18 @@ class navigation:
     def __init__(self, trackers):
 
         self.trackers = trackers
-        
-        #Each tracker is allowed to have up to 100 layers or disks
-        trackerOffset = 0
-        for i in range(len(self.trackers)):
-            trackerOffset = 500 * i
-            for bl, j in enumerate(trackers[i].barrelLayers):
-                bl.index = j + trackerOffset
-            for ed, j in enumerate(trackers[i].pEndcapLayers):
-                ed.index = j + 100 + trackerOffset
-            for ed, j in enumerate(trackers[i].mEndcapLayers):
-                ed.index = -j - 100 - trackerOffset
-
-    ############################################################################
-    def getLayerFromIndex(self, layerIndex):
-
-        sign = 1
-        if layerIndex < 0:
-            sign = -1
-        trIndex = int((sign*layerIndex) / 500)
-        if trIndex >= len(self.trackers):
-            return -1, 0, 0
-        lIndex = (sign*layerIndex) % 500
-        
-        if sign == 1:
-            #This is a barrel layer
-            if lIndex >= 0 and layerIndex < 100:
-                return trIndex, lIndex, 0
-            #This is a positive endcap layer
-            elif lIndex >= 100 and lIndex < 200:
-                return trIndex, lIndex - 100, 1
-            else:
-                return -1, 0, 0
-        else:
-            #This is a negative endcap layer
-            if lIndex >= 100 and lIndex < 200:
-                return trIndex, lIndex - 100, -1
-            else:
-                return -1, 0, 0
-
+        for tr in range(len(self.trackers)):
+            for layer in range(len(self.trackers[tr].barrelLayers)):
+                self.defineConnections(tr, layer, 0)
+            for layer in range(len(self.trackers[tr].pEndcapLayers)):
+                self.defineConnections(tr, layer, 1)
+            for layer in range(len(self.trackers[tr].mEndcapLayers)):
+                self.defineConnections(tr, layer, -1)
+    
     
     ############################################################################
-    def candidates(self, tr, layer, sys):
+    def defineConnections(self, tr, layer, sys):
 
-        if tr == -1:
-            return []
-
-        listOfCandidates = []
-        #Casuistics:
-        
         #It's the first layer of the barrel of the first tracker
         if tr == 0 and layer == 0 and sys == 0: 
             nextBarrel = [0, 1, 0]
@@ -70,14 +33,14 @@ class navigation:
             nextPEndcap = [tr, 0, 1]
             nextNEndcap = [tr, 0, -1]
             myself = [tr, layer, sys]
-            previus = [tr-1, len(self.trackers[tr-1])-1, 0]
+            previous = [tr-1, len(self.trackers[tr-1])-1, 0]
             self.trackers[tr].barrelLayers[layer].append(nextBarrel)
             self.trackers[tr].barrelLayers[layer].append(nextPEndcap)
             self.trackers[tr].barrelLayers[layer].append(nextNEndcap)
             self.trackers[tr].barrelLayers[layer].append(myself)
             self.trackers[tr].barrelLayers[layer].append(previous)
        #It's an intermediate layer of the barrel of any tracker
-       elif layer != 0 and layer != len(self.trackers[tr])-1 and sys == 0:
+        elif layer != 0 and layer != len(self.trackers[tr])-1 and sys == 0:
             nextBarrel = [tr, layer+1, 0]
             nextPEndcap = [tr, 0, 1]
             nextNEndcap = [tr, 0, -1]
@@ -110,37 +73,37 @@ class navigation:
             nextNEndcap = [tr, 0, -1]
             self.trackers[tr].barrelLayers[layer].append(nextPEndcap)
             self.trackers[tr].barrelLayers[layer].append(nextNEndcap)
-        #It's the first disk of the first tracker
-        elif tr != len(self.trackers) - 1 and layer == len(self.trackers[tr])-1 and sys == 0:
-            nextPEndcap = [tr, 0, 1]
-            nextNEndcap = [tr, 0, -1]
-            self.trackers[tr].barrelLayers[layer].append(nextPEndcap)
-            self.trackers[tr].barrelLayers[layer].append(nextNEndcap)
-           
-
-
-        if layerIndex > 0:
-
-            trIndex = int(layerIndex / 500)
-            lIndex = layerIndex % 500
-
-        if layerIndex >= 0 and layerIndex < 100:
-
-            #This is a barrel layer
-            if layerIndex != 
-
-        elif layerIndex >= 100 and layerIndex < 200:
-
-            #This is a positive endcap layer
-
-        elif layerIndex <= -100 and layerIndex > -200:
-
-            #This is a negative endcap layer
-
+        #It's a disk of a tracker but not the last disk and not the last tracker
+        elif tr != len(self.trackers)-1 and layer != len(self.trackers[tr])-1 and abs(sys) == 1:
+            nextEndcap = [tr, layer+1, sys]
+            nextBarrel = [tr+1, 0, 0]
+            nextPossibleEndcap =[tr+1, 0, sys]
+            if sys == 1:
+                self.trackers[tr].pEndcapLayers[layer].append(nextEndcap)
+                self.trackers[tr].pEndcapLayers[layer].append(nextBarrel)
+                self.trackers[tr].pEndcapLayers[layer].append(nextPossibleEndcap)
+            else:
+                self.trackers[tr].nEndcapLayers[layer].append(nextEndcap)
+                self.trackers[tr].nEndcapLayers[layer].append(nextBarrel)
+                self.trackers[tr].nEndcapLayers[layer].append(nextPossibleEndcap)
+        #It's the last disk of a tracker but not the last tracker
+        elif tr != len(self.trackers)-1 and layer == len(self.trackers[tr])-1 and abs(sys) == 1:
+            nextBarrel = [tr+1, 0, 0]
+            nextPossibleEndcap =[tr+1, 0, sys]
+            if sys == 1:
+                self.trackers[tr].pEndcapLayers[layer].append(nextBarrel)
+                self.trackers[tr].pEndcapLayers[layer].append(nextPossibleEndcap)
+            else:
+                self.trackers[tr].nEndcapLayers[layer].append(nextBarrel)
+                self.trackers[tr].nEndcapLayers[layer].append(nextPossibleEndcap)
+        #It's a disk of the last tracker but not the last disk 
+        elif tr == len(self.trackers)-1 and layer == len(self.trackers[tr])-1 and abs(sys) == 1:
+            print('Last tracker everything') 
         else:
+            print('Other cases')
 
-            return []
 
+      
 
 
 

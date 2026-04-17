@@ -11,8 +11,10 @@ class fullSystem:
 
     def propagateParticle(self, particle):
 
-        trajectory = particle.Trajectory() 
         trajState = particle.TrajectoryState()
+        valid = True
+        while valid:
+            
         layer = self.trackers[0].barrelLayers[0]
         for theLayer in layer.getLayers():
             trajState_, valid = self.propagate(trajState, layers)
