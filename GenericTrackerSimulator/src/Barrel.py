@@ -8,13 +8,14 @@ import sys
 
 class BarrelLayer:
     
-    def __init__(self, radius, Lz, X0):
+    def __init__(self, radius, Lz, X0, index):
 
         ####################################################################################################
         #                                   Representation of a Barrel Layer                               #
         # radius:  Radius of the layer                                                                     # 
         # Lz:      Length in Z of the layer                                                                # 
         # X0:      Mean radiation length up to this layer                                                  # 
+        # index:   The order of this layer with respect to IP. Barrel: [0, 100], Endcaps: [+-100, +-200]   # 
         ####################################################################################################
         self.R = radius
         self.Lz = Lz
@@ -22,6 +23,7 @@ class BarrelLayer:
         self.scattbase = (0.0136*0.0136) / X0
         self.nTrays = 0
         self.Trays = []
+        self.index = index
 
 
     ########################################################################################################

@@ -51,7 +51,7 @@ if __name__ == "__main__":
     #An example track 
     track = Track(0, 0, np.pi/2.0, 0.1, 10, 1.0)
     tracker.fullMeasurement(track)
-    noise = Noise(5)
+    noise = Noise(1)
     tracker.createNoiseBarrel(noise)
     tracker.createNoiseEndcap(noise)
 
