@@ -1,70 +1,52 @@
 from src.Tools.Plane import Plane
-from src.Tools.Module import Module
+from src.Geometry.BarrelModule import BarrelModule
 
-import numpy as np
+import math
 import sys
+import logging
+logger = logging.getLogger(__name__)
 
 
 
 class Tray:
     
-    def __init__(self, btlId, x, y, z, euler, TrayWidth, TrayLength, RULength, ModuleLength, ModuleWidth):
+    def __init__(self, btlId, x, y, z, euler, TrayWidth, TrayLength):
 
-        self.r = np.asarray([x, y, z])
-        sinphi = (self.r[1]/np.sqrt(self.r[0]**2+self.r[1]**2)) 
-        cosphi = (self.r[0]/np.sqrt(self.r[0]**2+self.r[1]**2))
-        if cosphi > 1.0:
-            cosphi = 1.0
-        if cosphi < -1.0:
-            cosphi = -1.0
-        if sinphi >= 0:
-            self.phi = np.arccos(cosphi)
-        else:
-            self.phi = -np.arccos(cosphi) + 2.0*np.pi
-        normal = np.asarray([self.r[0], self.r[1], 0.0])
-        self.n = normal/np.linalg.norm(normal)
-        self.btlId = btlId
+        self.x = x
+        self.y = y
+        self.z = z
+        self.R = math.sqrt(x**2 + y**2)
+        self.nx = x / self.R
+        self.ny = y / self.R
         self.TrayWidth = TrayWidth
         self.TrayLength = TrayLength
-        self.RULength = RULength
-        self.ModuleLength = ModuleLength
-        self.ModuleWidth = ModuleWidth 
+        self.maxZ = z + self.TrayLength / 2.0
+        self.minZ = z - self.TrayLength / 2.0 
         self.eulerAngles = euler
-        self.plane = Plane(self.r[0], self.r[1], self.r[2], self.n[0], self.n[1], self.n[2])
-        self.RUSpace = (self.TrayLength - 6.0 * self.RULength)/5.0
-        self.zFirstRU = np.abs(z) - TrayLength/2.0 + self.RULength/2.0
-        if self.btlId.side == -1:
-            self.zFirstRU = -1.0 * self.zFirstRU
-        self.RUs = []
-        for rutype in range(0, 3):
-            for runumber in range(0,2):
-                pos = rutype*2 + runumber
-                btl = BTLId()
-                btl.setTray(self.btlId.tray)
-                btl.setSide(self.btlId.side)
-                btl.setRU(rutype,runumber)
-                ru = BTLRU(btl, x, y, self.zFirstRU + btl.side * pos *(self.RULength + self.RUSpace), self.eulerAngles, self.TrayWidth, self.RULength, self.ModuleLength, self.ModuleWidth)
-                self.RUs.append(ru)
+        self.plane = Plane(self.x, self.y, self.z, self.nx, self.ny, 0.0)
+        self.nModules = 0
+        self.modules = []
+
+        if self.TrayWidth <= 0:
+            logging.error('The tray width cannot be a negative number')
+            sys.exit()
+        if self.TrayLength <= 0:
+            logging.error('The tray length cannot be a negative number')
+            sys.exit()
+              
+        logging.info('Setting up a tray at position x: %d, y: %d, z: %d and width: %d, length: %d', self.x, self.y, self.z, self.TrayWidth, self.TrayLength)
 
 
-    def intersection(self, track):
+
+    def addModule(self, module):
+
+        #####Add here warnings and protections
         
-        valid, x, y, z, t = self.plane.intersection(track)
-        x2 = track.pt * np.cos(track.phi)
-        y2 = track.pt * np.sin(track.phi)
-        z2 = track.pz
-        #print("Momentum", x2, y2, z2)
-        #print(track.pt * np.cos(track.phi), track.pt*np.sin(track.phi), track.pz)
-        #print(self.plane.p, self.plane.n)
-        #print(x, y, z, t, valid)
-        for m in self.RUs:
-            d = np.abs(z - m.r[2])
-            if d <= m.RULength/2.0:
-                valid, moduleId, point = m.intersection(x, y, z, track)
-                if valid:
-                    return True, moduleId, point
-        return False, [], []
+        self.modules.append(module)
+        self.nModules = self.nModules + 1
 
+        logging.info('A module has been added at position x: %d, y: %d, z: %d', module.x, module.y, module.z)
+   
 
 
     def draw(self, ax1, ax2, ax3, ax4, t, alpha=0.2):

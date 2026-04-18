@@ -8,7 +8,7 @@ from src.Generator.genParticle import genParticle
 
 
 
-class fullSystem:
+class FullTracker:
 
     def __init__(self, listOfTrackers):
 
