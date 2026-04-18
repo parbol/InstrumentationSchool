@@ -1,14 +1,12 @@
-from src.Plane import Plane
-from src.Module import Module
-from src.BTLRU import BTLRU
-from src.BTLId import BTLId
+from src.Tools.Plane import Plane
+from src.Tools.Module import Module
 
 import numpy as np
 import sys
 
 
 
-class BTLTray:
+class Tray:
     
     def __init__(self, btlId, x, y, z, euler, TrayWidth, TrayLength, RULength, ModuleLength, ModuleWidth):
 
