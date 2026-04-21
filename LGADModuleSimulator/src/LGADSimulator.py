@@ -8,7 +8,7 @@ import numpy as np
 
 class LGADSimulator:
 
-    def __init__(self, thickness, radius, intLumi, loc, scale):
+    def __init__(self, thickness, radius, intLumi, loc, scale, clock, threshold):
        
         self.thickness = thickness
         self.radius = radius
@@ -17,81 +17,75 @@ class LGADSimulator:
         self.gain = self.GainVsFluence(self.fluence)
         self.loc = loc
         self.scale = scale
+        self.clock = clock
+        self.threshold = threshold
+        self.landau = landau(loc=self.loc, scale=self.scale)
 
 
     def getResponse(self, id, p, angle, t):
        
-        energyDeposit = self.bethe_block(p, id, self.thickness*np.cos(angle)) * self.gain
-        MPV = self.MostProbableValue(p, id)
-
+        mpv, scale = self.LandauParameters(id, p, self.thickness/np.cos(angle))
+        ran = landau(loc=mpv, scale=scale)
+        energyDeposit = ran.rvs(1)
 
 
         
+    def getTOAandTOT(self, energyDeposit, mpv):
+
+        samplingSpace = self.loc + 20.0*self.scale
+        samplingStep = self.clock
+        
+        toa = 0.0
+        l = 0.0
+        while l < samplingSpace:
+
+            val = self.landau.pdf(l) * energyDeposit
+            if val > self.threshold:
+               toa = l
+               break
+            l = l + samplingStep
+                
+        toc = 0.0
+        l = samplingSpace
+        while l > 0: 
+            val = self.landau.pdf(l) * energyDeposit
+            if val > self.threshold:
+               toc = l
+               break
+            l = l - samplingStep
+
+        SignalToNoise = (self.landau.pdf(self.loc) * energyDeposit / self.referenceChargeColl) / self.noiseLevel
+        sigmaJitter1 = self.loc / SignalToNoise
+        sigmaJitter2 = (toc - self.loc) / SignalToNoise
+        sigmaTDC = self.sigmaTDC
+        sigmaLandauNoise = self.evaluate(energyDeposit, mpv)
+        sigmaToA = np.sqrt(sigmaJitter1**2 + sigmaTDC**2 + sigmaLandauNoise**2)
+        sigmaToC = np.sqrt(sigmaJitter2**2 + sigmaTDC**2 + sigmaLandauNoise**2)
 
 
-    def bethe_bloch(self, p_particle, id, length):
-          
+    
 
-        m = self.getMass(id)
-        m_particle = m * 1000.0
-        z = 1.0
+    def LandauParameters(self, id, p, l):
+       
+        #https://inspirehep.net/files/c19072326d8b479e4fa9b8ca7a57cf0e
 
-        # Physical Constants
-        c = 299792458  # m/s
+        #Some constants adapted to silicon
+        I = 173e-6 # Ionizing potential in MeV
+        delta = 0.0 # Shielding term (not considered)
         mec2 = 0.511   # MeV (electron rest mass)
-        K = 0.307075   # MeV cm^2 / mol
-        # Material Properties (example: Silicon)
-        # Z: Atomic number, A: Atomic mass (g/mol), I: Ionization potential (MeV)
-        Z_target = 14
-        A_target = 28.085
-        I = 173e-6 # MeV
-        d = 2.32 # g/cm3 (Si)
-
+        
         # Kinematics
-        # Energy in MeV
-        # To MeV
-        p = p_particle * 1000
+        m = self.getMass(id)
         E = np.sqrt(p**2 + m**2)
         gamma = E / m
         beta = np.sqrt(1 - (1/gamma)**2)
-    
-        # Maximum energy transfer
-        Tmax = (2 * mec2 * beta**2 * gamma**2) / (1 + 2 * gamma * (mec2 / m_particle) + (mec2 / m_particle)**2)
-
-        epsilon = K * z**2 * (Z_target / A_target) * (1 / beta**2) * 0.5  
-        # Bethe-Bloch Formula
-        stopping_power = epsilon * (np.log(2 * mec2 * beta**2 * gamma**2 * Tmax / I**2) - beta**2)
-        deltaE = stopping_power * d * length
-        DeltaEMPV = deltaE + epsilon * (beta**2 + np.log(epsilon/Tmax)+0.194)
         
-    
-        #in GeV
-        return stopping_power * d * length
-
-
-    def MostProbableValue(self, p, id):
-       
-        if abs(id) == 13:
-          
-          return 1.21561e-05 + 8.89462e-07 / (p * p)
-       
-        elif abs(id) == 11:
-          
-          return 1.30030e-05 + 1.55166e-07 / (p * p)
-       
-        elif abs(id) == 321:
-          
-          return 1.20998e-05 + 2.47192e-06 / (p * p * p)
-       
-        elif abs(id) == 2212:
-          
-          return 1.13666e-05 + 1.20093e-05 / (p * p)
-
-        else:
-          
-          return 1.24531e-05 + 7.16578e-07 / (p * p)
+        scale = 0.017825 * l / beta**2 # MeV
+        mpv = scale * (np.log(2 * mec2 * beta**2 * gamma**2/I) + np.log(scale/I) + 0.2 - beta**2 - delta) # MeV
         
+        return mpv, scale
 
+               
     def getMass(self, id):
        
         #All masses in GeV
