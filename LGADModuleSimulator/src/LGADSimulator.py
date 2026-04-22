@@ -21,30 +21,38 @@ class LGADSimulator:
         self.clock = clock
         self.threshold = threshold
         self.signal = landau(loc=self.loc, scale=self.scale)
-
+        self.signalMax = self.signal.pdf(self.scale)
+        self.fCPerGev = 0.160217663/0.015
 
     #######################################################
     def getResponse(self, id, p, angle, t):
        
         mpv, scale = self.LandauParameters(id, p, self.thickness/np.cos(angle))
+        print('MPV:', mpv)
         ran = landau(loc=mpv, scale=scale)
-        energyDeposit = ran.rvs(1)
-        toa, tot = self.getTOAandTOT(energyDeposit, mpv, t)
-        return toa, tot, energyDeposit
+        energyDeposit = ran.rvs(1)[0]
+        charge = energyDeposit * self.fCPerGev * self.gain
+        print('Gain', self.gain)
+        print('Charge', charge)
+        mpcharge = mpv * self.fCPerGev * self.gain 
+        toa, tot = self.getTOAandTOT(charge, mpcharge, t)
+        return toa, tot, charge
 
 
     #######################################################    
-    def getTOAandTOT(self, energyDeposit, mpv, t):
+    def getTOAandTOT(self, charge, mpcharge, t):
 
+        #Return negative tot if no signal
+        if self.signalMax * charge <= self.threshold:
+           return 0, -1
         samplingSpace = self.loc + 20.0*self.scale
         samplingStep = self.clock
         print('Sampling between', 0, samplingSpace, self.threshold)
-        energyDeposit = 1.0
         toa = 0.0
         l = 0.0
         while l < samplingSpace:
 
-            val = self.signal.pdf(l) * energyDeposit
+            val = self.signal.pdf(l) * charge
             print(val)
             if val > self.threshold:
                toa = l
@@ -54,7 +62,7 @@ class LGADSimulator:
         toc = 0.0
         l = samplingSpace
         while l > 0: 
-            val = self.signal.pdf(l) * energyDeposit
+            val = self.signal.pdf(l) * charge
             if val > self.threshold:
                toc = l
                break
@@ -133,10 +141,13 @@ class LGADSimulator:
     #######################################################   
     def drawEvent(self, ax, id, p, angle, t):
        
-        toa, tot, energyDeposit = self.getResponse(id, p, angle, t)
+        toa, tot, charge = self.getResponse(id, p, angle, t)
+        print(toa, tot, charge)
+        if tot == -1:
+           print('No signal detected')
+           return
         n = int(4.0 * tot/self.clock)
         a = np.linspace(toa-tot, toa + 3.0*tot, n)
-        print(toa, tot, energyDeposit)
         ax.plot(a, self.signal.pdf(a), color = 'b')
         ax.axvline(x = toa, color = 'b', linestyle='dashed')
         ax.axvline(x = tot, color = 'b', linestyle='dashed')
