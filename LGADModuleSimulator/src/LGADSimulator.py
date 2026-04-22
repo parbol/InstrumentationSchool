@@ -1,8 +1,9 @@
+###########################################################
+###########################################################
+###########################################################
 from scipy.stats import landau
 import numpy as np
-
-
-
+import matplotlib.pyplot as plt
 
 
 
@@ -19,27 +20,32 @@ class LGADSimulator:
         self.scale = scale
         self.clock = clock
         self.threshold = threshold
-        self.landau = landau(loc=self.loc, scale=self.scale)
+        self.signal = landau(loc=self.loc, scale=self.scale)
 
 
+    #######################################################
     def getResponse(self, id, p, angle, t):
        
         mpv, scale = self.LandauParameters(id, p, self.thickness/np.cos(angle))
         ran = landau(loc=mpv, scale=scale)
         energyDeposit = ran.rvs(1)
+        toa, tot = self.getTOAandTOT(energyDeposit, mpv, t)
+        return toa, tot, energyDeposit
 
 
-        
-    def getTOAandTOT(self, energyDeposit, mpv):
+    #######################################################    
+    def getTOAandTOT(self, energyDeposit, mpv, t):
 
         samplingSpace = self.loc + 20.0*self.scale
         samplingStep = self.clock
-        
+        print('Sampling between', 0, samplingSpace, self.threshold)
+        energyDeposit = 1.0
         toa = 0.0
         l = 0.0
         while l < samplingSpace:
 
-            val = self.landau.pdf(l) * energyDeposit
+            val = self.signal.pdf(l) * energyDeposit
+            print(val)
             if val > self.threshold:
                toa = l
                break
@@ -48,23 +54,24 @@ class LGADSimulator:
         toc = 0.0
         l = samplingSpace
         while l > 0: 
-            val = self.landau.pdf(l) * energyDeposit
+            val = self.signal.pdf(l) * energyDeposit
             if val > self.threshold:
                toc = l
                break
             l = l - samplingStep
 
-        SignalToNoise = (self.landau.pdf(self.loc) * energyDeposit / self.referenceChargeColl) / self.noiseLevel
-        sigmaJitter1 = self.loc / SignalToNoise
-        sigmaJitter2 = (toc - self.loc) / SignalToNoise
-        sigmaTDC = self.sigmaTDC
-        sigmaLandauNoise = self.evaluate(energyDeposit, mpv)
-        sigmaToA = np.sqrt(sigmaJitter1**2 + sigmaTDC**2 + sigmaLandauNoise**2)
-        sigmaToC = np.sqrt(sigmaJitter2**2 + sigmaTDC**2 + sigmaLandauNoise**2)
+        #SignalToNoise = (self.landau.pdf(self.loc) * energyDeposit / self.referenceChargeColl) / self.noiseLevel
+        #sigmaJitter1 = self.loc / SignalToNoise
+        #sigmaJitter2 = (toc - self.loc) / SignalToNoise
+        #sigmaTDC = self.sigmaTDC
+        #sigmaLandauNoise = self.evaluate(energyDeposit, mpv)
+        #sigmaToA = np.sqrt(sigmaJitter1**2 + sigmaTDC**2 + sigmaLandauNoise**2)
+        #sigmaToC = np.sqrt(sigmaJitter2**2 + sigmaTDC**2 + sigmaLandauNoise**2)
 
-
+        return t+toa, t+toc
     
 
+    #######################################################    
     def LandauParameters(self, id, p, l):
        
         #https://inspirehep.net/files/c19072326d8b479e4fa9b8ca7a57cf0e
@@ -83,9 +90,10 @@ class LGADSimulator:
         scale = 0.017825 * l / beta**2 # MeV
         mpv = scale * (np.log(2 * mec2 * beta**2 * gamma**2/I) + np.log(scale/I) + 0.2 - beta**2 - delta) # MeV
         
-        return mpv, scale
+        return 0.001*mpv, 0.001*scale #In GeV
 
-               
+
+    #######################################################    
     def getMass(self, id):
        
         #All masses in GeV
@@ -109,15 +117,30 @@ class LGADSimulator:
           
           return 0.13957
     
-    
+
+    #######################################################    
     def FluenceVsRadius(self, r):
        
-       return 1.937*math.power(r,-1.706)
+       return 1.937*np.power(r,-1.706)
     
-
+    
+    #######################################################    
     def GainVsFluence(self, f):
        
        return min(15.0,30.0-f)
     
 
-   
+    #######################################################   
+    def drawEvent(self, ax, id, p, angle, t):
+       
+        toa, tot, energyDeposit = self.getResponse(id, p, angle, t)
+        n = int(4.0 * tot/self.clock)
+        a = np.linspace(toa-tot, toa + 3.0*tot, n)
+        print(toa, tot, energyDeposit)
+        ax.plot(a, self.signal.pdf(a), color = 'b')
+        ax.axvline(x = toa, color = 'b', linestyle='dashed')
+        ax.axvline(x = tot, color = 'b', linestyle='dashed')
+        ax.axhline(y = self.threshold, color = 'r', linestyle='dashed')
+        ax.set_xlabel('Time [ns]')
+        ax.set_ylabel('Charge [fC]')
+
