@@ -9,20 +9,19 @@ import matplotlib.pyplot as plt
 
 class LGADSimulator:
 
-    def __init__(self, thickness, radius, intLumi, loc, scale, clock, threshold):
+    def __init__(self, thickness, radius, intLumi, taur, taud, clock, threshold):
        
         self.thickness = thickness
         self.radius = radius
         self.intLumi = intLumi
         self.fluence = self.FluenceVsRadius(self.radius) * self.intLumi
         self.gain = self.GainVsFluence(self.fluence)
-        self.loc = loc
-        self.scale = scale
+        self.loc = taur
+        self.scale = taud
         self.clock = clock
         self.threshold = threshold
-        self.signal = landau(loc=self.loc, scale=self.scale)
-        self.signalMax = self.signal.pdf(self.scale)
-        self.fCPerGev = 0.160217663/0.015
+        self.signalMax = self.signalpdf(self.loc)
+        self.fCPerGev = 1.60217663/3.65 * 1e5
 
     #######################################################
     def getResponse(self, id, p, angle, t):
@@ -43,6 +42,7 @@ class LGADSimulator:
     def getTOAandTOT(self, charge, mpcharge, t):
 
         #Return negative tot if no signal
+        print('Signal * charge', self.signalMax * charge)
         if self.signalMax * charge <= self.threshold:
            return 0, -1
         samplingSpace = self.loc + 20.0*self.scale
@@ -146,9 +146,9 @@ class LGADSimulator:
         if tot == -1:
            print('No signal detected')
            return
-        n = int(4.0 * tot/self.clock)
+        n = int(20.0 * tot/self.clock)
         a = np.linspace(toa-tot, toa + 3.0*tot, n)
-        ax.plot(a, self.signal.pdf(a), color = 'b')
+        ax.plot(a, charge*self.signal.pdf(a), color = 'b')
         ax.axvline(x = toa, color = 'b', linestyle='dashed')
         ax.axvline(x = tot, color = 'b', linestyle='dashed')
         ax.axhline(y = self.threshold, color = 'r', linestyle='dashed')
