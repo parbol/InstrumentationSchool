@@ -33,12 +33,9 @@ class LGADSimulator:
     def getResponse(self, id, p, angle, t):
        
         mpv, scale = self.LandauParameters(id, p, self.thickness/np.cos(angle))
-        print('MPV:', mpv)
         ran = landau(loc=mpv, scale=scale)
         energyDeposit = ran.rvs(1)[0]
         charge = energyDeposit * self.fCPerGev * self.gain
-        print('Gain', self.gain)
-        print('Charge', charge)
         mpcharge = mpv * self.fCPerGev * self.gain 
         toa, tot = self.getTOAandTOT(charge, mpcharge, t)
         return toa, tot, charge
@@ -79,10 +76,6 @@ class LGADSimulator:
         sigmaToA = np.sqrt(sigmaJitter1**2 + sigmaTDC**2 + sigmaLandauNoise**2)
         sigmaToC = np.sqrt(sigmaJitter2**2 + sigmaTDC**2 + sigmaLandauNoise**2)
 
-        print('sigmajitter1', sigmaJitter1)
-        print('sigmaLandau', sigmaLandauNoise)
-        print('sigmaTDC', sigmaTDC)
-        print('SigmaToA', sigmaToA)
         gauss1  = norm(loc=0, scale=sigmaToA)
         gauss2  = norm(loc=0, scale=sigmaToC)
 
@@ -157,7 +150,6 @@ class LGADSimulator:
     def drawEvent(self, ax, id, p, angle, t):
        
         toa, tot, charge = self.getResponse(id, p, angle, t)
-        print(toa, tot, charge)
         if tot == -1:
            print('No signal detected')
            return
