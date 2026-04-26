@@ -36,6 +36,7 @@ if __name__ == "__main__":
         p = np.random.uniform(1.0, 20) #GeV
         idselect = np.random.uniform(0, 1)
         id = 0
+        idselect = 0.9
         if idselect < 0.03:
             id = 13
         elif idselect >= 0.03 and idselect < 0.06:

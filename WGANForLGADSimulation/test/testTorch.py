@@ -9,19 +9,18 @@ import numpy as np
 cuda = True if torch.cuda.is_available() else False # GPU Setting
 
 
-
-
-
-
 if __name__=='__main__':
     
     parser = optparse.OptionParser(usage='usage: %prog [options] path', version='%prog 1.0')
     parser.add_option('-i', '--input', action='store', type='string', dest='input', default='inputval.parquet', help='Input file')
     (opts, args) = parser.parse_args()
 
+    device = 'cuda'
+    if not cuda:
+        device = 'cpu'
 
     data = pd.read_parquet(opts.input).to_numpy()
-    tensordata = torch.tensor(data, device='cuda')
+    tensordata = torch.tensor(data, dtype=torch.float32, device=device)
     loader = torch.utils.data.DataLoader(dataset=tensordata, batch_size = 2048, shuffle=True)	 
 
 
@@ -31,48 +30,53 @@ if __name__=='__main__':
     generator_loss = torch.nn.MSELoss()
     generator_optimizer = torch.optim.Adam(generator.parameters(), lr=0.001)
 
+    discriminator_loss_real = torch.nn.BCELoss()
+    discriminator_loss_fake = torch.nn.BCELoss()
+    discriminator_optimizer = torch.optim.Adam(discriminator.parameters(), lr=0.001)
+
+
     if cuda:
         generator.cuda()
         discriminator.cuda()
         generator_loss.cuda()
         generator_optimizer.cuda()
+        discriminator_loss_real.cuda()
+        discriminator_loss_fake.cuda()
+        discriminator_optimizer.cuda()
 
     n_epochs = 10 # suggested default = 200
     latent_dim = 5
     nstepsgen = 5
     nstepsdis = 3
     for epoch in range(n_epochs):
-        for i, (x, _) in enumerate(loader):    
+        for i, x in enumerate(loader):    
             #Running nstepgens times the generator
+            generatorInput = x[:,1:3]
+            print(generatorInput)
+            realEvents = x[:, 4:6]
             for istep in range(nstepsgen):
-                generator_optimizer.grad()
-                generatorInput = x[:,1:3]
-                realEvents = x[:, 4:5]
-                z_ = torch.tensor(np.random.normal(0, 1, (generatorInput.shape[0],latent_dim)))
-                z = torch.cat(z_, generatorInput)
-                fakeEvents = generator(realEvents)
+                generator_optimizer.zero_grad()
+                z_ = torch.tensor(np.random.normal(0, 1, (generatorInput.shape[0],latent_dim)), dtype=torch.float32)
+                z = torch.cat((z_, generatorInput), 1)
+                fakeEvents = generator(z)
                 g_loss = generator_loss(fakeEvents, realEvents)
                 g_loss.backward()
                 generator_optimizer.step()
+            
             #Running nstepgdis times the generator
+            z_ = torch.tensor(np.random.normal(0, 1, (generatorInput.shape[0],latent_dim)), dtype=torch.float32)
+            z = torch.cat((z_, generatorInput), 1)
+            fakeEvents = generator(z)
+            fakeCat = torch.zeros(fakeEvents.shape[0],1)
+            realCat = torch.ones(realEvents.shape[0],1)
             for istep in range(nstepsdis):
-                generator_optimizer.grad()
-                generatorInput = x[:,1:3]
-                realEvents = x[:, 4:5]
-                z_ = torch.tensor(np.random.normal(0, 1, (generatorInput.shape[0],latent_dim)))
-                z = torch.cat(z_, generatorInput)
-                fakeEvents = generator(realEvents)
-                g_loss = generator_loss(fakeEvents, realEvents)
-                g_loss.backward()
-                generator_optimizer.step()
+                discriminator_optimizer.zero_grad()
+                realEventCat = discriminator(realEvents)
+                d_loss_real = discriminator_loss_real(realEventCat, realCat)
+                d_loss_real.backward()
+                fakeEventCat = discriminator(fakeEvents.detach())
+                d_loss_fake = discriminator_loss_fake(fakeEventCat, fakeCat)
+                d_loss_fake.backward()
+                discriminator_optimizer.step()
 
 
-
-
-            # Adversarial ground truths (For more detail, refer *Read_More below)
-            valid = Variable(Tensor(imgs.size(0), 1).fill_(1.0), requires_grad=False) # imgs.size(0) == batch_size(1 batch) == 64, *TEST_CODE
-            fake = Variable(Tensor(imgs.size(0), 1).fill_(0.0), requires_grad=False) # And Variable is for caclulate gradient. In fact, you can use it, but you don't have to. 
-                                                                                # requires_grad=False is default in tensor type. *Read_More
-        
-        # Configure input
-        real_imgs = imgs.type(Tensor) # As mentioned, it is no longer necessary to wrap the tensor in a Variable.    
