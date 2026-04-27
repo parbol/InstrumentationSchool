@@ -8,13 +8,13 @@ class Discriminator(torch.nn.Module):
 		super().__init__()
 	
 		self.encoder = torch.nn.Sequential(
-			torch.nn.Linear(2, 100),
-	        torch.nn.BatchNorm1d(100),
+			torch.nn.Linear(5, 5),
+	        torch.nn.BatchNorm1d(5),
             torch.nn.ReLU(),
-			torch.nn.Linear(100, 50),
-	        torch.nn.BatchNorm1d(50),
+			torch.nn.Linear(5, 3),
+	        torch.nn.BatchNorm1d(3),
 			torch.nn.ReLU(),
-			torch.nn.Linear(50, 1),
+			torch.nn.Linear(3, 1),
 			torch.nn.Sigmoid()
 		)
 		
