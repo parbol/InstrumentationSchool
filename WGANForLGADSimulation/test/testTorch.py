@@ -5,6 +5,7 @@ import pandas as pd
 import optparse
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
 
 
 cuda = True if torch.cuda.is_available() else False # GPU Setting
@@ -21,36 +22,29 @@ if __name__=='__main__':
         device = 'cpu'
 
     data = pd.read_parquet(opts.input).to_numpy()
+    #scaler = StandardScaler()
+    #data = scaler.fit_transform(data)
     tensordata = torch.tensor(data, dtype=torch.float32, device=device)
-    loader = torch.utils.data.DataLoader(dataset=tensordata, batch_size = 64, shuffle=True)	 
+    loader = torch.utils.data.DataLoader(dataset=tensordata, batch_size = 32678, shuffle=True)	 
+    #loader = torch.utils.data.DataLoader(dataset=tensordata, shuffle=True)	 
 
 
     generator = Generator()
     discriminator = Discriminator()
-    
-    generator_loss = torch.nn.MSELoss()
-    generator_optimizer = torch.optim.Adam(generator.parameters(), lr=0.001)
-
-    discriminator_loss_real = torch.nn.BCELoss()
-    discriminator_loss_fake = torch.nn.BCELoss()
-    discriminator_optimizer = torch.optim.Adam(discriminator.parameters(), lr=0.001)
-
-
+    #criterion = torch.nn.BCELoss()
     if cuda:
         generator.cuda()
         discriminator.cuda()
-        generator_loss.cuda()
-        #generator_optimizer.cuda()
-        discriminator_loss_real.cuda()
-        discriminator_loss_fake.cuda()
-        #discriminator_optimizer.cuda()
+        #criterion.cuda()
+    generator_optimizer = torch.optim.Adam(generator.parameters(), lr=0.0001)
+    discriminator_optimizer = torch.optim.Adam(discriminator.parameters(), lr=0.001)
 
     epochs = []
     loss_disc = []
     loss_gen = []
     n_epochs = 50 # suggested default = 200
     latent_dim = 5
-    nstepsgen = 5
+    nstepsgen = 10
     nstepsdis = 1
     for epoch in range(n_epochs):
         numericLossDiscriminator = 0
@@ -59,38 +53,36 @@ if __name__=='__main__':
             #Running nstepgens times the generator
             generatorInput = x[:,1:4]
             realEvents = x[:, 1:6]
+            fakeCat = torch.zeros(realEvents.shape[0], 1, device=device)
+            realCat = torch.ones(realEvents.shape[0], 1, device=device)
             for istep in range(nstepsgen):
                 generator_optimizer.zero_grad()
-                z_ = torch.tensor(np.random.normal(0, 1, (generatorInput.shape[0],latent_dim)), dtype=torch.float32, device=device)
-                z = torch.cat((z_, generatorInput), 1)
-                fakeEvents_ = generator(z)
+                #z_ = torch.tensor(np.random.normal(0, 1, (generatorInput.shape[0],latent_dim)), dtype=torch.float32, device=device)
+                #z = torch.cat((z_, generatorInput), 1)
+                #fakeEvents_ = generator(z)
+                fakeEvents_ = generator(generatorInput)
                 fakeEvents = torch.cat((generatorInput, fakeEvents_), 1)
-                g_loss = generator_loss(fakeEvents, realEvents)
+                fakeEventCat = discriminator(fakeEvents.detach())
+                print(realEvents)
+                g_loss = -torch.mean(fakeEventCat)
                 g_loss.backward()
                 generator_optimizer.step()
                 numericLossGenerator = g_loss.item()
-                #numericLossGenerator = g_loss.detach().cpu().numpy()[0]
             #Running nstepgdis times the generator
-            z_ = torch.tensor(np.random.normal(0, 1, (generatorInput.shape[0],latent_dim)), dtype=torch.float32, device=device)
-            z = torch.cat((z_, generatorInput), 1)
-            fakeEvents_ = generator(z)
-            fakeEvents = torch.cat((generatorInput, fakeEvents_), 1)
-            fakeCat = torch.zeros(fakeEvents.shape[0], 1, device=device)
-            realCat = torch.ones(realEvents.shape[0], 1, device=device)
             for istep in range(nstepsdis):
                 discriminator_optimizer.zero_grad()
-                realEventCat = discriminator(realEvents)
-                d_loss_real = discriminator_loss_real(realEventCat, realCat)
-                d_loss_real.backward()
+                #z_ = torch.tensor(np.random.normal(0, 1, (generatorInput.shape[0],latent_dim)), dtype=torch.float32, device=device)
+                #z = torch.cat((z_, generatorInput), 1)
+                #fakeEvents_ = generator(z)
+                fakeEvents_ = generator(generatorInput)
+                fakeEvents = torch.cat((generatorInput, fakeEvents_), 1)
                 fakeEventCat = discriminator(fakeEvents.detach())
-                d_loss_fake = discriminator_loss_fake(fakeEventCat, fakeCat)
-                d_loss_fake.backward()
+                realEventCat = discriminator(realEvents)
+                d_loss = torch.mean(fakeEventCat) - torch.mean(realEventCat)
+                d_loss.backward()
                 discriminator_optimizer.step()
-                #d_l_r = d_loss_real.detach().cpu().numpy()[0]
-                #d_l_f = d_loss_fake.detach().cpu().numpy()[0]
-                d_l_r = d_loss_real.item()
-                d_l_f = d_loss_fake.item()
-                numericLossDiscriminator = 0.5 * (d_l_r + d_l_f)
+                d_l = d_loss.item()
+                numericLossDiscriminator = d_l 
         print('Epoch:', epoch, 'Generator loss:', numericLossGenerator, 'Discriminator loss:', numericLossDiscriminator)
         epochs.append(epoch)
         loss_gen.append(numericLossGenerator)
@@ -105,7 +97,7 @@ if __name__=='__main__':
     # Defining the Plot Style
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
-    plt.yscale('log')
+    #plt.yscale('log')
     # Plotting the last 100 values
     plt.plot(np.asarray(epochs), np.asarray(loss_gen), color='blue')
     plt.plot(np.asarray(epochs), np.asarray(loss_disc), color='red')

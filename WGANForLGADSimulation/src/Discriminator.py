@@ -8,14 +8,14 @@ class Discriminator(torch.nn.Module):
 		super().__init__()
 	
 		self.encoder = torch.nn.Sequential(
-			torch.nn.Linear(5, 5),
-	        torch.nn.BatchNorm1d(5),
+			torch.nn.Linear(5, 10),
+	        torch.nn.BatchNorm1d(10),
             torch.nn.ReLU(),
-			torch.nn.Linear(5, 3),
-	        torch.nn.BatchNorm1d(3),
+			torch.nn.Linear(10, 5),
+	        torch.nn.BatchNorm1d(5),
 			torch.nn.ReLU(),
-			torch.nn.Linear(3, 1),
-			torch.nn.Sigmoid()
+			torch.nn.Linear(5, 1),
+            torch.nn.Sigmoid()
 		)
 		
 

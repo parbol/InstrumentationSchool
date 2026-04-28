@@ -8,7 +8,7 @@ class Generator(torch.nn.Module):
 		super().__init__()
 	
 		self.encoder = torch.nn.Sequential(
-			torch.nn.Linear(8, 25),
+			torch.nn.Linear(3, 25),
 	        torch.nn.BatchNorm1d(25),
             torch.nn.ReLU(),
 			torch.nn.Linear(25, 50),
