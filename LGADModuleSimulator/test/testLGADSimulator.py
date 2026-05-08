@@ -52,7 +52,7 @@ if __name__ == "__main__":
             continue
         t = np.random.uniform(1, 5) #ns
         toa, tot, charge = lgad.getResponse(id, p, phi, t)
-        if charge == -1:
+        if charge == -1 or abs(toa)>100.0 or abs(tot)>100.0:
             continue
         events['id'].append(id)
         events['p'].append(p)
