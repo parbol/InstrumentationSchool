@@ -4,18 +4,21 @@ import torch
 
 class Discriminator(torch.nn.Module):
 
-	def __init__(self):
+	def __init__(self, conditional_dim, output_dim):
 		super().__init__()
 	
 		self.encoder = torch.nn.Sequential(
-			torch.nn.Linear(5, 10),
-	        torch.nn.BatchNorm1d(10),
+			torch.nn.Linear(conditional_dim + output_dim , 64),
+	        torch.nn.BatchNorm1d(64),
             torch.nn.ReLU(),
-			torch.nn.Linear(10, 5),
-	        torch.nn.BatchNorm1d(5),
+			torch.nn.Linear(64, 32),
+	        torch.nn.BatchNorm1d(32),
 			torch.nn.ReLU(),
-			torch.nn.Linear(5, 1),
-            torch.nn.Sigmoid()
+			torch.nn.Linear(32, 16),
+	        torch.nn.BatchNorm1d(16),
+			torch.nn.ReLU(),
+			torch.nn.Linear(16, 1),
+            torch.nn.ReLU()
 		)
 		
 

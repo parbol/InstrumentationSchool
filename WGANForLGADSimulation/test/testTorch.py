@@ -10,6 +10,23 @@ from sklearn.preprocessing import StandardScaler
 
 cuda = True if torch.cuda.is_available() else False # GPU Setting
 
+####################Parameters######################
+batch_size=8192
+#12 dimensions for the latent_space
+latent_dim = 12
+#3 conditional variables: p, phi and t
+conditional_dim = 3
+#2 output variables: toa, tot
+output_dim = 2
+#Learning rate
+lr = 0.0001
+#Number of epochs
+n_epochs=400
+#N steps generation
+nstepsgen = 1
+#N steps discriminator
+nstepsdis = 2
+####################Parameters######################
 
 if __name__=='__main__':
     
@@ -22,30 +39,23 @@ if __name__=='__main__':
         device = 'cpu'
 
     data = pd.read_parquet(opts.input).to_numpy()
-    #scaler = StandardScaler()
-    #data = scaler.fit_transform(data)
+    scaler = StandardScaler()
+    data = scaler.fit_transform(data)
     tensordata = torch.tensor(data, dtype=torch.float32, device=device)
-    loader = torch.utils.data.DataLoader(dataset=tensordata, batch_size = 32678, shuffle=True)	 
-    #loader = torch.utils.data.DataLoader(dataset=tensordata, shuffle=True)	 
+    loader = torch.utils.data.DataLoader(dataset=tensordata, batch_size = batch_size, shuffle=True)	 
 
+    generator = Generator(latent_dim=latent_dim, conditional_dim=conditional_dim, output_dim=output_dim)
+    discriminator = Discriminator(conditional_dim=conditional_dim, output_dim=output_dim)
 
-    generator = Generator()
-    discriminator = Discriminator()
-    #criterion = torch.nn.BCELoss()
     if cuda:
         generator.cuda()
         discriminator.cuda()
-        #criterion.cuda()
-    generator_optimizer = torch.optim.Adam(generator.parameters(), lr=0.0001)
-    discriminator_optimizer = torch.optim.Adam(discriminator.parameters(), lr=0.001)
+    generator_optimizer = torch.optim.Adam(generator.parameters(), lr=lr)
+    discriminator_optimizer = torch.optim.Adam(discriminator.parameters(), lr=lr)
 
     epochs = []
     loss_disc = []
     loss_gen = []
-    n_epochs = 50 # suggested default = 200
-    latent_dim = 5
-    nstepsgen = 10
-    nstepsdis = 1
     for epoch in range(n_epochs):
         numericLossDiscriminator = 0
         numericLossGenerator = 0
@@ -53,36 +63,32 @@ if __name__=='__main__':
             #Running nstepgens times the generator
             generatorInput = x[:,1:4]
             realEvents = x[:, 1:6]
-            fakeCat = torch.zeros(realEvents.shape[0], 1, device=device)
-            realCat = torch.ones(realEvents.shape[0], 1, device=device)
-            for istep in range(nstepsgen):
-                generator_optimizer.zero_grad()
-                #z_ = torch.tensor(np.random.normal(0, 1, (generatorInput.shape[0],latent_dim)), dtype=torch.float32, device=device)
-                #z = torch.cat((z_, generatorInput), 1)
-                #fakeEvents_ = generator(z)
-                fakeEvents_ = generator(generatorInput)
+            #Running nstepgdis times the generator
+            for istep in range(nstepsdis):
+                discriminator_optimizer.zero_grad()
+                z_ = torch.tensor(np.random.normal(0, 1, (generatorInput.shape[0],latent_dim)), dtype=torch.float32, device=device)
+                z = torch.cat((z_, generatorInput), 1)
+                fakeEvents_ = generator(z)
                 fakeEvents = torch.cat((generatorInput, fakeEvents_), 1)
                 fakeEventCat = discriminator(fakeEvents.detach())
-                print(realEvents)
+                realEventCat = discriminator(realEvents)
+                f_loss = torch.mean(fakeEventCat) - torch.mean(realEventCat)
+                #d_loss = f_loss + 10.0 * gradient_penalty(discriminator, realEvents, fakeEvents.detach())
+                f_loss.backward()
+                discriminator_optimizer.step()
+                d_l = f_loss.item()
+                numericLossDiscriminator = d_l 
+            for istep in range(nstepsgen):
+                generator_optimizer.zero_grad()
+                z_ = torch.tensor(np.random.normal(0, 1, (generatorInput.shape[0],latent_dim)), dtype=torch.float32, device=device)
+                z = torch.cat((z_, generatorInput), 1)
+                fakeEvents_ = generator(z)
+                fakeEvents = torch.cat((generatorInput, fakeEvents_), 1)
+                fakeEventCat = discriminator(fakeEvents)
                 g_loss = -torch.mean(fakeEventCat)
                 g_loss.backward()
                 generator_optimizer.step()
                 numericLossGenerator = g_loss.item()
-            #Running nstepgdis times the generator
-            for istep in range(nstepsdis):
-                discriminator_optimizer.zero_grad()
-                #z_ = torch.tensor(np.random.normal(0, 1, (generatorInput.shape[0],latent_dim)), dtype=torch.float32, device=device)
-                #z = torch.cat((z_, generatorInput), 1)
-                #fakeEvents_ = generator(z)
-                fakeEvents_ = generator(generatorInput)
-                fakeEvents = torch.cat((generatorInput, fakeEvents_), 1)
-                fakeEventCat = discriminator(fakeEvents.detach())
-                realEventCat = discriminator(realEvents)
-                d_loss = torch.mean(fakeEventCat) - torch.mean(realEventCat)
-                d_loss.backward()
-                discriminator_optimizer.step()
-                d_l = d_loss.item()
-                numericLossDiscriminator = d_l 
         print('Epoch:', epoch, 'Generator loss:', numericLossGenerator, 'Discriminator loss:', numericLossDiscriminator)
         epochs.append(epoch)
         loss_gen.append(numericLossGenerator)

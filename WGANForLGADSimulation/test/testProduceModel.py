@@ -8,6 +8,16 @@ from sklearn.preprocessing import StandardScaler
 
 cuda = True if torch.cuda.is_available() else False # GPU Setting
 
+####################Parameters######################
+batch_size=512
+#12 dimensions for the latent_space
+latent_dim = 12
+#3 conditional variables: p, phi and t
+conditional_dim = 3
+#2 output variables: toa, tot
+output_dim = 2
+####################Parameters######################
+
 
 if __name__=='__main__':
     
@@ -26,14 +36,13 @@ if __name__=='__main__':
     model.eval()
 
     data = pd.read_parquet(opts.input).to_numpy()
-    #scaler = StandardScaler()
-    #data = scaler.fit_transform(data)
+    scaler = StandardScaler()
+    data = scaler.fit_transform(data)
     tensordata = torch.tensor(data, dtype=torch.float32, device=device)
-    loader = torch.utils.data.DataLoader(dataset=tensordata, batch_size = 512, shuffle=True)	 
+    loader = torch.utils.data.DataLoader(dataset=tensordata, batch_size = batch_size, shuffle=True)	 
     samples = torch.empty((0, data.shape[1]), dtype=torch.float32, device=device)
-    latent_dim = 5
     for i, x in enumerate(loader):    
-        #Running nstepgens times the generator
+        
         generatorInput = x[:,1:4]
         z_ = torch.tensor(np.random.normal(0, 1, (generatorInput.shape[0],latent_dim)), dtype=torch.float32, device=device)
         z = torch.cat((z_, generatorInput), 1)
@@ -41,8 +50,8 @@ if __name__=='__main__':
         sample = torch.cat((x[:,0:4], events.detach()), 1)
         samples = torch.cat((samples, sample), 0)
 
-
     data = samples.detach().cpu().numpy()
+    data = scaler.inverse_transform(data)
     dataset = pd.DataFrame({'id': data[:,0], 'p': data[:,1], 'phi': data[:,2], 't': data[:,3], 'toa': data[:,4], 'tot':data[:,5]})
     dataset.to_parquet(opts.output)
 
