@@ -67,6 +67,6 @@ if __name__ == "__main__":
     df.to_parquet(opts.outputFile)
 
     #fig, ax = plt.subplots()
-    #lgad.drawEvent(ax, 13, 10, 0, 0)
+    #lgad.drawEvent(ax, 13, 10, 0, 0, 'b')
     #plt.show()
     

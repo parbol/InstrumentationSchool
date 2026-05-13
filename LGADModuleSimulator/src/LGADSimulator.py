@@ -147,7 +147,7 @@ class LGADSimulator:
     
 
     #######################################################   
-    def drawEvent(self, ax, id, p, angle, t):
+    def drawEvent(self, ax, id, p, angle, t, color):
        
         toa, tot, charge = self.getResponse(id, p, angle, t)
         if tot == -1:
@@ -155,10 +155,10 @@ class LGADSimulator:
            return
         n = int(20.0 * tot/self.clock)
         a = np.linspace(0, toa + 3.0*tot, n)
-        ax.plot(a, charge*self.signalpdf(a), color = 'b')
-        ax.axvline(x = toa, color = 'b', linestyle='dashed')
-        ax.axvline(x = tot, color = 'b', linestyle='dashed')
-        ax.axhline(y = self.threshold, color = 'r', linestyle='dashed')
+        ax.plot(a, charge*self.signalpdf(a), color = color)
+        ax.axvline(x = toa, color = color, linestyle='dashed')
+        ax.axvline(x = tot, color = color, linestyle='dashed')
+        ax.axhline(y = self.threshold, color = color, linestyle='dashed')
         ax.set_xlabel('Time [ns]')
         ax.set_ylabel('Charge [fC]')
 
