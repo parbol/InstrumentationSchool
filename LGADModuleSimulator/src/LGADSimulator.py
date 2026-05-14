@@ -145,23 +145,6 @@ class LGADSimulator:
        
        return min(15.0,30.0-f)
     
-
-    #######################################################   
-    def drawEvent(self, ax, id, p, angle, t, color):
-       
-        toa, tot, charge = self.getResponse(id, p, angle, t)
-        if tot == -1:
-           print('No signal detected')
-           return
-        n = int(20.0 * tot/self.clock)
-        a = np.linspace(0, toa + 3.0*tot, n)
-        ax.plot(a, charge*self.signalpdf(a), color = color)
-        ax.axvline(x = toa, color = color, linestyle='dashed')
-        ax.axvline(x = tot, color = color, linestyle='dashed')
-        ax.axhline(y = self.threshold, color = color, linestyle='dashed')
-        ax.set_xlabel('Time [ns]')
-        ax.set_ylabel('Charge [fC]')
-
     
     #######################################################   
     def signalpdf(self, t):
