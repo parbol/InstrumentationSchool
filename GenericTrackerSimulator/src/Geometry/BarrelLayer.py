@@ -1,6 +1,10 @@
-from src.Geometry.Tray import Tray
+from GenericTracker.src.Geometry.BarrelModule import BarrelModule
+from GenericTracker.src.Geometry.BarrelTray import Tray
+from GenericTracker.src.Tools.EulerRotation import EulerRotation
+import numpy as np
 import sys
 import logging
+
 logger = logging.getLogger(__name__)
 
 class BarrelLayer:
@@ -34,7 +38,7 @@ class BarrelLayer:
     ########################################################################################################
     def addTray(self, tray):
 
-        if tray.maxZ > self.LZ/2.0 or tray.minZ < -self.LZ/2.0 or tray.R >= self.R:
+        if tray.maxZ > self.Lz/2.0 or tray.minZ < -self.Lz/2.0 or tray.R >= self.R:
             logging.error('The tray is not fitting the layer')
             sys.exit()
 
@@ -44,6 +48,40 @@ class BarrelLayer:
         logging.info('A tray has been added to the layer at position x: %d, y: %d, z: %d', tray.x, tray.y, tray.z)
 
 
-    
+    ########################################################################################################
+    def makeTrayCrown(self, phiShift, NPhiModule, NPhiSize, zShift, NZModule, NZSize):
+
+        if NPhiSize * NPhiModule > np.pi * 2.0:
+            logging.error('The crown configuration is not correct')
+            sys.exit()
+        if NZSize * NZSize > self.Lz:
+            logging.error('The crown configuration is not correct')
+            sys.exit()
+
+        trayWidth = 2.0 * self.R * np.sin(NPhiSize/2.0)
+        trayLength = NZSize
+        for i in range(NPhiModule):
+            phi = phiShift + i * 2.0 * np.pi / NPhiModule
+            x = self.R * np.cos(phi)
+            y = self.R * np.sin(phi)
+            for j in range(NZModule):
+                zp = zShift + j * self.Lz / (NZModule/2.0)
+                zm = -zShift - j * self.Lz / (NZModule/2.0)
+                vx = np.asarray([np.sin(phi), -np.cos(phi), 0.0])
+                vy = np.asarray([0.0, 0.0, 1.0])
+                vz = np.asarray([np.cos(phi), np.sin(phi), 0.0])
+                euler = EulerRotation()
+                euler.setFromVectors(vx, vy, vz)
+                tp = Tray(x, y, zp, euler, trayWidth, trayLength)
+                tm = Tray(x, y, zm, euler, trayWidth, trayLength)
+
+
+
+
+
+
+
+
+
     
    

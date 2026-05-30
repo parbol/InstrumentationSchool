@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class Tray:
     
-    def __init__(self, btlId, x, y, z, euler, TrayWidth, TrayLength):
+    def __init__(self, x, y, z, euler, TrayWidth, TrayLength):
 
         self.x = x
         self.y = y
