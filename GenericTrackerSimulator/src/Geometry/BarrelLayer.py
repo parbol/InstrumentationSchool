@@ -1,5 +1,5 @@
-from GenericTracker.src.Geometry.BarrelModule import BarrelModule
-from GenericTracker.src.Geometry.BarrelTray import Tray
+from GenericTracker.src.Geometry.Module import Module
+from GenericTracker.src.Geometry.Tray import Tray
 from GenericTracker.src.Tools.EulerRotation import EulerRotation
 import numpy as np
 import sys
@@ -20,8 +20,18 @@ class BarrelLayer:
         self.R = radius
         self.Lz = Lz
         self.X0 = X0
-        self.nTrays = 0
 
+        # Barrel Layer Id
+        self.trackerIndex = 0
+        self.barrelIndex = 0
+        
+        # Barrel contains trays in the positive and negative sides
+        self.npTrays = 0
+        self.nnTrays = 0
+        self.nTrays = []
+        self.pTrays = []
+
+        # Sanity checks for barrel information
         if self.R <= 0:
             logging.error('The radius of a barrel layer cannot be negative')
             sys.exit()
@@ -36,44 +46,78 @@ class BarrelLayer:
 
 
     ########################################################################################################
-    def addTray(self, tray):
+    def addTray(self, tray, zside):
 
-        if tray.maxZ > self.Lz/2.0 or tray.minZ < -self.Lz/2.0 or tray.R >= self.R:
+        if tray.TrayLength > self.Lz/2.0:
             logging.error('The tray is not fitting the layer')
             sys.exit()
 
-        self.nTrays = self.nTrays + 1
-        self.Trays.append(tray)
+        if zside >= 0:
+            tray.type = 1
+            tray.zside = 1
+            tray.trayIndex = self.npTrays
+            tray.barrelIndex = self.barrelIndex
+            tray.trackerIndex = self.trackerIndex
+            self.npTrays = self.npTrays + 1
+            self.pTrays.append(tray)
+        else:
+            tray.type = 1
+            tray.zside = 0
+            tray.trayIndex = self.nnTrays
+            tray.barrelIndex = self.barrelIndex
+            tray.trackerIndex = self.trackerIndex
+            self.nnTrays = self.nnTrays + 1
+            self.nTrays.append(tray)
         
         logging.info('A tray has been added to the layer at position x: %d, y: %d, z: %d', tray.x, tray.y, tray.z)
 
 
     ########################################################################################################
-    def makeTrayCrown(self, phiShift, NPhiModule, NPhiSize, zShift, NZModule, NZSize):
+    def makeTraysAllAround(self, phiShift, NPhiTray, NPhiSize, zShift, NZTray, NZSize,
+                           nWModules, nLModules, wSizeModule, lSizeModule):
 
-        if NPhiSize * NPhiModule > np.pi * 2.0:
-            logging.error('The crown configuration is not correct')
+        ########################################################################################################
+        # This method creates Trays at different positions in Phi
+        # phiShift: Initial displacement of the first tray
+        # NPhiTray: Number of trays
+        # NPhiSize: Angular size of the tray
+        # zShift: Initial displacement of the first tray in Z
+        # NZTray: Number of Z trays
+        # nWModules: Number of modules in the phi direction
+        # nLModules: Number of modules in the longitudinal direction
+        # wSizeModule: Size of the modules in the phi direction
+        # lSizeModule: Size of the modules in the longitudinal direction
+        ########################################################################################################
+        
+        # Sanity checks on the numbers
+        if NPhiSize * NPhiTray > np.pi * 2.0:
+            logging.error('The configuration of trays is not correct')
             sys.exit()
-        if NZSize * NZSize > self.Lz:
-            logging.error('The crown configuration is not correct')
+        if NZSize * NZTray + 2.0 * zShift> self.Lz:
+            logging.error('The configuration of trays is not correct')
             sys.exit()
 
         trayWidth = 2.0 * self.R * np.sin(NPhiSize/2.0)
         trayLength = NZSize
-        for i in range(NPhiModule):
-            phi = phiShift + i * 2.0 * np.pi / NPhiModule
+        for i in range(NPhiTray):
+            phi = phiShift + NPhiSize/2.0 + i * 2.0 * np.pi / NPhiTray
             x = self.R * np.cos(phi)
             y = self.R * np.sin(phi)
-            for j in range(NZModule):
-                zp = zShift + j * self.Lz / (NZModule/2.0)
-                zm = -zShift - j * self.Lz / (NZModule/2.0)
+            for j in range(NZTray):
+                zp = zShift + NZSize/2.0 + j * self.Lz / (NZTray/2.0)
+                zm = -zShift + NZSize/2.0 - j * self.Lz / (NZTray/2.0)
                 vx = np.asarray([np.sin(phi), -np.cos(phi), 0.0])
                 vy = np.asarray([0.0, 0.0, 1.0])
                 vz = np.asarray([np.cos(phi), np.sin(phi), 0.0])
                 euler = EulerRotation()
                 euler.setFromVectors(vx, vy, vz)
+                # Create the trays through the center rotation and size
                 tp = Tray(x, y, zp, euler, trayWidth, trayLength)
+                tp.makeModulesInBarrelTray(nWModules, nLModules, wSizeModule, lSizeModule)
                 tm = Tray(x, y, zm, euler, trayWidth, trayLength)
+                tm.makeModulesInBarrelTray(nWModules, nLModules, wSizeModule, lSizeModule)
+                self.addTray(tp, 1)
+                self.addTray(tm, 0)
 
 
 
