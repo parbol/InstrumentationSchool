@@ -20,6 +20,7 @@ class BarrelLayer:
         self.R = radius
         self.Lz = Lz
         self.X0 = X0
+        self.barrelIndex = index
 
         # Barrel Layer Id
         self.trackerIndex = 0
@@ -89,13 +90,14 @@ class BarrelLayer:
         # lSizeModule: Size of the modules in the longitudinal direction
         ########################################################################################################
         
-        # Sanity checks on the numbers
+        # Sanity checks on the geometry of the trays
         if NPhiSize * NPhiTray > np.pi * 2.0:
             logging.error('The configuration of trays is not correct')
             sys.exit()
         if NZSize * NZTray + 2.0 * zShift> self.Lz:
             logging.error('The configuration of trays is not correct')
             sys.exit()
+
 
         trayWidth = 2.0 * self.R * np.sin(NPhiSize/2.0)
         trayLength = NZSize
@@ -107,10 +109,11 @@ class BarrelLayer:
                 zp = zShift + NZSize/2.0 + j * self.Lz / (NZTray/2.0)
                 zm = -zShift + NZSize/2.0 - j * self.Lz / (NZTray/2.0)
                 vx = np.asarray([np.sin(phi), -np.cos(phi), 0.0])
-                vy = np.asarray([0.0, 0.0, 1.0])
                 vz = np.asarray([np.cos(phi), np.sin(phi), 0.0])
+                vy = np.cross(vz, vx)
                 euler = EulerRotation()
                 euler.setFromVectors(vx, vy, vz)
+                
                 # Create the trays through the center rotation and size
                 tp = Tray(x, y, zp, euler, trayWidth, trayLength)
                 tp.makeModulesInBarrelTray(nWModules, nLModules, wSizeModule, lSizeModule)

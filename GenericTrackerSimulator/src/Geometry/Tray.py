@@ -10,34 +10,34 @@ logger = logging.getLogger(__name__)
 
 class Tray:
     
-    def __init__(self, x, y, z, euler, TrayWidth, TrayLength, nxModules, nyModules, xSizeModule, ySizeModule):
+    def __init__(self, x, y, z, euler, TrayWidth, TrayLength):
 
+        # Position of the tray
         self.x = x
         self.y = y
         self.z = z
         self.r = np.asarray([x, y, z])
-        normal = np.asarray([self.r[0], self.r[1], 0.0])
-        self.n = normal/np.linalg.norm(normal)
-        vn = np.asarray([-self.n[1], self.n[0], 0.0])
-        self.vn = vn/np.linalg.norm(vn)    
-        self.nxModules = nxModules
-        self.nyModules = nyModules
-        self.xSizeModules = xSizeModule
-        self.ySizeModules = ySizeModule
+        # Orientation of the tray
+        self.vx = euler.apply(np.asarray([1.0, 0.0, 0.0]))
+        self.vy = euler.apply(np.asarray([0.0, 1.0, 0.0]))
+        self.vz = euler.apply(np.asarray([0.0, 0.0, 1.0]))
+        self.eulerAngles = euler
+        self.plane = Plane(self.x, self.y, self.z, self.vz[0], self.vz[1], self.vz[2])
+        
+        # Information of ID
         self.type = 0
         self.zside = 0
         self.trayIndex = 0
         self.barrelIndex = 0
         self.trackerIndex = 0
-        self.R = math.sqrt(x**2 + y**2)
-        self.nx = x / self.R
-        self.ny = y / self.R
+        
+        # Information of tray dimensions
         self.TrayWidth = TrayWidth
         self.TrayLength = TrayLength
         self.maxZ = z + self.TrayLength / 2.0
         self.minZ = z - self.TrayLength / 2.0 
-        self.eulerAngles = euler
-        self.plane = Plane(self.x, self.y, self.z, self.nx, self.ny, 0.0)
+        
+        # Module content
         self.nModules = 0
         self.modules = []
 
@@ -71,6 +71,8 @@ class Tray:
         stepLength = self.TrayLength / nLModules    
         for ix in range(nWModules):
             for iz in range(nLModules):
+                rmod = self.r
+                rmin = (-self.TrayWidth/2.0 * self.vx - self.TrayLength/2.0 * self.vy 
                 x = self.x + (-self.TrayWidth/2.0 + (ix * stepWidth + stepWidth/2.0)) * self.vn[0]
                 y = self.y + (-self.TrayWidth/2.0 + (ix * stepWidth + stepWidth/2.0)) * self.vn[1]
                 z = self.z + (-self.TrayLength/2.0 + (iz * stepLength + stepLength/2.0))
