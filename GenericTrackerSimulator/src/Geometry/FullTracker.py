@@ -2,9 +2,9 @@
 ############################################################################
 ############################################################################
 ############################################################################
-from src.Navigation.navigation import navigation
-from src.Propagation.trajectoryState import trajectoryState
-from src.Generator.genParticle import genParticle
+from GenericTrackerSimulator.src.Navigation.navigation import navigation
+from GenericTrackerSimulator.src.Propagation.trajectoryState import trajectoryState
+from GenericTrackerSimulator.src.Generation.genParticle import genParticle
 
 
 

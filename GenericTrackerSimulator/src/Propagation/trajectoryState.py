@@ -1,5 +1,5 @@
 import math
-from src.Generator.genParticle import genParticle
+from GenericTrackerSimulator.src.Generation.genParticle import genParticle
 
 
 class trajectoryState:
