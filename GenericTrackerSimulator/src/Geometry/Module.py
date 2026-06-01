@@ -16,7 +16,8 @@ class BarrelModule:
         self.x = x
         self.y = y
         self.z = z
-
+        self.r = np.asarray(np.asarray([x, y, z]))
+        self.eulerAngles = euler
         self.Lx = Lx
         self.Ly = Ly
         
@@ -60,7 +61,7 @@ class BarrelModule:
 
 
 
- def drawModule(self, ax1, ax2, ax3, ax4, t, alpha=0.2):
+    def drawModule(self, ax1, ax2, ax3, ax4, t, alpha=0.2):
 
         x_start = [self.pLL[0], self.pLR[0], self.pUR[0], self.pUL[0], self.pLL[0]]
         y_start = [self.pLL[1], self.pLR[1], self.pUR[1], self.pUL[1], self.pLL[1]]

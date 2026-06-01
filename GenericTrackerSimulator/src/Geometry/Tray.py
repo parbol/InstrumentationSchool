@@ -50,7 +50,7 @@ class Tray:
               
         logging.info('Setting up a tray at position x: %d, y: %d, z: %d and width: %d, length: %d', self.x, self.y, self.z, self.TrayWidth, self.TrayLength)
 
-
+    ########################################################################################################
     def addModule(self, module):
 
         #####Add here warnings and protections
@@ -61,7 +61,8 @@ class Tray:
 
         logging.info('A module has been added at position x: %d, y: %d, z: %d', module.x, module.y, module.z)
    
-
+ 
+    ########################################################################################################
     def makeModulesInBarrelTray(self, nWModules, nLModules, wSizeModule, lSizeModule):
 
         if nWModules * wSizeModule > self.TrayWidth or nLModules * lSizeModule > self.TrayLength:
@@ -72,11 +73,9 @@ class Tray:
         for ix in range(nWModules):
             for iz in range(nLModules):
                 rmod = self.r
-                rmin = (-self.TrayWidth/2.0 * self.vx - self.TrayLength/2.0 * self.vy 
-                x = self.x + (-self.TrayWidth/2.0 + (ix * stepWidth + stepWidth/2.0)) * self.vn[0]
-                y = self.y + (-self.TrayWidth/2.0 + (ix * stepWidth + stepWidth/2.0)) * self.vn[1]
-                z = self.z + (-self.TrayLength/2.0 + (iz * stepLength + stepLength/2.0))
-                m = Module(x, y, z, wSizeModule, lSizeModule, self.eulerAngles)
+                rmin = (-self.TrayWidth/2.0 + stepWidth/2.0) * self.vx + (-self.TrayLength/2.0 + stepLength/2.0) * self.vy 
+                rmod = rmin + ix * self.vx + iz * self.vy
+                m = Module(rmod[0], rmod[1], rmod[2], wSizeModule, lSizeModule, self.eulerAngles)
                 m.trackerIndex = self.trackerIndex
                 m.barrelIndex = self.barrelIndex
                 m.endcapIndex = self.endcapIndex
@@ -84,8 +83,8 @@ class Tray:
                 m.zside = self.zside         
                 self.addModule(m)
 
-
-
+ 
+    ########################################################################################################
     def draw(self, ax1, ax2, ax3, ax4, t, alpha=0.2):
         
         for m in self.RUs:
