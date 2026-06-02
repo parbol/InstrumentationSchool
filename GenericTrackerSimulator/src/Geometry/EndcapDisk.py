@@ -7,25 +7,25 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-class BarrelLayer:
+class EndcapDisk:
     
-    def __init__(self, radius, Lz, X0, index):
+    def __init__(self, radius, z, X0, index):
 
         ####################################################################################################
-        #                                   Representation of a Barrel Layer                               #
-        # radius:  Radius of the layer                                                                     # 
-        # Lz:      Length in Z of the layer                                                                # 
+        #                               Representation of an Endcap Disk                                   #
+        # radius:  Radius of the disk                                                                      # 
+        # z:       z position                                                                              # 
         # X0:      Mean radiation length up to this layer                                                  # 
         ####################################################################################################
         self.R = radius
-        self.Lz = Lz
+        self.z = z
         self.X0 = X0
+        self.endcapIndex = index
 
         # Barrel Layer Id
         self.trackerIndex = 0
-        self.barrelIndex = index
         
-        # Barrel contains trays in the positive and negative sides
+        # Barrel contains trays in the positive and negative Ds
         self.npTrays = 0
         self.nnTrays = 0
         self.nTrays = []
@@ -33,16 +33,16 @@ class BarrelLayer:
 
         # Sanity checks for barrel information
         if self.R <= 0:
-            logging.error('The radius of a barrel layer cannot be negative')
+            logging.error('The radius of an endcap disk cannot be negative')
             sys.exit()
         if self.Lz <= 0:
-            logging.error('The length of a barrel layer cannot be negative')
+            logging.error('The length of an endcap disk cannot be negative')
             sys.exit()
         if self.X0 <= 0:
             logging.error('The radiation length cannot be negative')
             sys.exit()
         
-        logging.info('Setting up a layer with radius: %d, length: %d and radiation length: %d', self.R, self.Lz, self.X0)
+        logging.info('Setting up a disk with radius: %f, z pos: %f and radiation length: %f', self.R, self.z, self.X0)
 
 
     ########################################################################################################
@@ -73,7 +73,7 @@ class BarrelLayer:
 
 
     ########################################################################################################
-    def makeTraysAllAround(self, phiShift, NPhiTray, PhiTraySize, zShift, NZTray, ZTraySize,
+    def makeTraysInDee(self, phiShift, NPhiTray, PhiTraySize, zShift, NZTray, ZTraySize,
                            nWModules, nLModules, wSizeModule, lSizeModule):
 
         ########################################################################################################
