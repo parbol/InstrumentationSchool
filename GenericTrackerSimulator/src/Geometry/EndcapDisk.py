@@ -73,17 +73,14 @@ class EndcapDisk:
 
 
     ########################################################################################################
-    def makeTraysInDee(self, phiShift, NPhiTray, PhiTraySize, zShift, NZTray, ZTraySize,
+    def makeTraysInDisk(self, xShift, NXTray, xTraySize,
                            nWModules, nLModules, wSizeModule, lSizeModule):
 
         ########################################################################################################
         # This method creates Trays at different positions in Phi
-        # phiShift: Initial displacement of the first tray
-        # NPhiTray: Number of trays
-        # PhiTraySize: Angular size of the tray
-        # zShift: Initial displacement of the first tray in Z
-        # NZTray: Number of Z trays
-        # ZTraySize: Size of the tray in Z
+        # xShift: Initial displacement of the first tray
+        # NXTray: Number of x trays
+        # xTraySize: Size of the tray in Z
         # nWModules: Number of modules in the phi direction
         # nLModules: Number of modules in the longitudinal direction
         # wSizeModule: Size of the modules in the phi direction
@@ -91,21 +88,17 @@ class EndcapDisk:
         ########################################################################################################
         
         # Sanity checks on the geometry of the trays
-        if PhiTraySize * NPhiTray > np.pi * 2.0:
-            logging.error('The configuration of trays is not correct in phi')
+        if xShift + NXTray/2.0 * xTraySize > self.R:
+            logging.error('The configuration of trays is not correct in the disk')
             sys.exit()
         
-        if ZTraySize * NZTray + 2.0 * zShift> self.Lz:
-            logging.error('The configuration of trays is not correct in Z')
-            sys.exit()
-
-
-        trayWidth = 2.0 * self.R * np.sin(PhiTraySize/2.0)
-        phiSpaceBetweenTrays = (2.0 * np.pi - PhiTraySize * NPhiTray) / NPhiTray 
-        print('phiSpaceBetweenTrays', phiSpaceBetweenTrays)
-        trayLength = ZTraySize
-        zSpaceBetweenTrays = ((self.Lz / 2.0) - zShift) / (NZTray/2)
-        for i in range(NPhiTray):
+        xSpaceBetweenTrays = (self.R - xShift - NXTray * xTraySize)/ (NXTray/2) 
+        for i in range(int(NXTray/2)):
+            xp = xShift + (xTraySize/2.0) + i * (xTraySize+xSpaceBetweenTrays)
+            xm = -xShift - (xTraySize/2.0) - i * (xTraySize+xSpaceBetweenTrays)
+            xpmax = xp + xTraySize/2.0
+            xmmin = xp - xTraySize/2.0
+            
             phi = (phiShift + PhiTraySize/2.0) + i * (PhiTraySize + phiSpaceBetweenTrays)
             x = self.R * np.cos(phi)
             y = self.R * np.sin(phi)
