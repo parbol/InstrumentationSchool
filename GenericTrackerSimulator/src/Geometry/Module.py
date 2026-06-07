@@ -23,6 +23,12 @@ class Module:
         self.Lx = Lx
         self.Ly = Ly
         
+        self.trackerIndex = -1
+        self.barrelIndex = -1
+        self.diskIndex = -1
+        self.trayIndex = -1
+        self.moduleIndex = -1
+        
         # Orientation of the module
         self.eulerAngles = euler        
         z = np.asarray([0.0, 0.0, 1.0])
@@ -38,11 +44,6 @@ class Module:
         self.pUL = self.toGlobal(self.pULlocal)
         self.pUR = self.toGlobal(self.pURlocal)
 
-        print('Module position')
-        print(self.pLL)
-        print(self.pLR)
-        print(self.pUL)
-        print(self.pUR)
         
     ########################################################################################################
     def toGlobal(self, v):

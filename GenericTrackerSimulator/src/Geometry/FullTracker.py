@@ -10,12 +10,17 @@ from GenericTrackerSimulator.src.Generation.genParticle import genParticle
 
 class FullTracker:
 
-    def __init__(self, listOfTrackers):
+    def __init__(self, listOfTrackers=[]):
 
         self.trackers = listOfTrackers
-        self.navigator = navigation(self.trackers)
+        #self.navigator = navigation(self.trackers)
 
     
+    def addTracker(self, tr):
+
+        self.trackers.append(tr)
+
+
     def propagateParticle(self, particle):
 
         trajState = trajectoryState(0, 0, 0, 0, 0, 1)
@@ -42,3 +47,25 @@ class FullTracker:
                 if validHit:
                     self.trajectory.addHit(hit)
         
+    ########################################################################################################
+    def draw(self, ax1, ax2, ax3, ax4, t1, t2, alpha=0.2):
+
+        for tr in self.trackers:
+            tr.draw(ax1, ax2, ax3, ax4, t1, t2, alpha)
+
+
+    ########################################################################################################
+    def drawBarrel(self, ax1, ax2, ax3, ax4, t, alpha=0.2):
+        
+        for tr in self.trackers:
+            tr.drawBarrel(ax1, ax2, ax3, ax4, t, alpha)
+       
+
+    ########################################################################################################
+    def drawEndcaps(self, ax1, ax2, ax3, ax4, t, alpha=0.2):
+        
+        for tr in self.trackers:
+            tr.drawEndcaps(ax1, ax2, ax3, ax4, t, alpha)
+       
+    
+   

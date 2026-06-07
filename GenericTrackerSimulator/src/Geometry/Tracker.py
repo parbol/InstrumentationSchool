@@ -85,28 +85,44 @@ class Tracker:
     #######################################################################
     def addEndcapDisk(self, disk):
 
-        if disk.radius > self.endcapMaxR or disk.radius < self.endcapMaxR or abs(disk.Z) < self.endcapMinZ or abs(disk.Z) > self.endcapMaxZ:
+        if disk.R > self.endcapMaxR or disk.R < self.endcapMinR or abs(disk.z) < self.endcapMinZ or abs(disk.z) > self.endcapMaxZ:
             logging.error('There was an endcap disk not fitting the tracker volume')
             sys.exit()
 
-        if disk.Z > 0:
-            if disk.Z < self.pEndcapDisks[self.npEndcapDisks-1]:
+        if disk.z > 0:
+            if self.npEndcapDisks != 0 and disk.z < self.pEndcapDisks[self.npEndcapDisks-1].z:
                 logging.error('A positive disk with lower Z than an existing one has been tried')
                 sys.exit()
             self.pEndcapDisks.append(disk)
             self.npEndcapDisks = self.npEndcapDisks + 1
         else:
-            if disk.Z > self.mEndcapDisks[self.mpEndcapDisks-1]:
+            if self.nmEndcapDisks != 0 and disk.z > self.mEndcapDisks[self.nmEndcapDisks-1].z:
                 logging.error('A nevative disk with lower Z than an existing one has been tried')
                 sys.exit()
             self.mEndcapDisks.append(disk)
             self.nmEndcapDisks = self.nmEndcapDisks + 1
 
-        logging.info('Adding an endcap disk to the tracker at Z: %d', disk.Z)
+        logging.info('Adding an endcap disk to the tracker at Z: %d', disk.z)
 
     
     ########################################################################################################
-    def draw(self, ax1, ax2, ax3, ax4, t, alpha=0.2):
+    def draw(self, ax1, ax2, ax3, ax4, t1, t2, alpha=0.2):
+
+        self.drawBarrel(ax1, ax2, ax3, ax4, t1, alpha)
+        self.drawEndcaps(ax1, ax2, ax3, ax4, t2, alpha)
+
+
+    ########################################################################################################
+    def drawBarrel(self, ax1, ax2, ax3, ax4, t, alpha=0.2):
         
         for b in self.barrelLayers:
+            b.draw(ax1, ax2, ax3, ax4, t, alpha)
+       
+
+    ########################################################################################################
+    def drawEndcaps(self, ax1, ax2, ax3, ax4, t, alpha=0.2):
+        
+        for b in self.mEndcapDisks:
+            b.draw(ax1, ax2, ax3, ax4, t, alpha)
+        for b in self.pEndcapDisks:
             b.draw(ax1, ax2, ax3, ax4, t, alpha)
