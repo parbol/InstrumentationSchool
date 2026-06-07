@@ -14,8 +14,13 @@ if __name__=='__main__':
 
 
     gBuilder = GeometryBuilder()
+    #If we want to generate a geometry from Geometry Builder
+    #gBuilder.build()
+    #gTools = GeometryTools(gBuilder.ftr)
+    #gTools.exportGeometry('tracker.json')
+
     gTools = GeometryTools(gBuilder.ftr)
-    gTools.exportGeometry('file.json')
+    gTools.importGeometry('tracker.json')
 
     #Some global variables
     #fig = plt.figure(figsize = plt.figaspect(0.3))

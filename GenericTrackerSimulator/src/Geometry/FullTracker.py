@@ -18,6 +18,7 @@ class FullTracker:
     
     def addTracker(self, tr):
 
+        tr.trackerIndex = len(self.trackers)
         self.trackers.append(tr)
 
 

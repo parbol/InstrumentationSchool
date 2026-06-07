@@ -8,6 +8,7 @@ from GenericTrackerSimulator.src.Tools.EulerRotation import EulerRotation
 import numpy as np
 import sys
 import logging
+import json
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', encoding='utf-8', level=logging.INFO)
@@ -37,6 +38,97 @@ class GeometryTools:
             trs = self.getTracker(tr)
             geom['trackers'].append(trs)
           
+        with open(filename, 'w') as f:
+                json.dump(geom, f, ensure_ascii=False, indent=4)
+
+    
+    ########################################################################
+    def importGeometry(self, filename):
+    
+        with open(filename) as json_data:
+            info = json.load(json_data)
+    
+        for tr in info['trackers']:
+
+            tracker = Tracker(tr['barrelMinR'], tr['barrelMaxR'], tr['barrelLZ'],
+                              tr['endcapMinR'], tr['endcapMaxR'], tr['endcapMinZ'],
+                              tr['endcapMaxZ'], tr['trackerIndex'])            
+            
+            for bl in tr['barrelLayers']:
+
+                blayer = BarrelLayer(bl['R'], bl['Lz'], bl['X0'], bl['barrelIndex'])
+
+                for tray in bl['nTrays']:
+                    euler = EulerRotation(tray['psi'], tray['theta'], tray['phi'])
+                    tra = Tray(tray['x'], tray['y'], tray['z'], euler,
+                                tray['TrayWidth'], tray['TrayLength'])
+                     
+                    for m in tray['Modules']:
+                    
+                        eulerM = EulerRotation(m['psi'], m['theta'], m['phi'])
+                        mod = Module(m['x'], m['y'], m['z'], m['Lx'],
+                                     m['Ly'], eulerM)
+                        tra.addModule(mod)
+                    blayer.addTray(tra, -1)
+                
+                for tray in bl['pTrays']:
+                    euler = EulerRotation(tray['psi'], tray['theta'], tray['phi'])
+                    tra = Tray(tray['x'], tray['y'], tray['z'], euler,
+                                tray['TrayWidth'], tray['TrayLength'])
+                     
+                    for m in tray['Modules']:
+                    
+                        eulerM = EulerRotation(m['psi'], m['theta'], m['phi'])
+                        mod = Module(m['x'], m['y'], m['z'], m['Lx'],
+                                     m['Ly'], eulerM)
+                        tra.addModule(mod)
+                    blayer.addTray(tra, 1)
+
+                tracker.addBarrelLayer(blayer)
+
+            for ed in tr['mEndcapDisks']:
+
+                edisk = EndcapDisk(ed['R'], ed['z'], ed['X0'], ed['diskIndex'])
+                
+                for tray in ed['Trays']:
+                    
+                    euler = EulerRotation(tray['psi'], tray['theta'], tray['phi'])
+                    tra = Tray(tray['x'], tray['y'], tray['z'], euler,
+                                tray['TrayWidth'], tray['TrayLength'])
+                     
+                    for m in tray['Modules']:
+                    
+                        eulerM = EulerRotation(m['psi'], m['theta'], m['phi'])
+                        mod = Module(m['x'], m['y'], m['z'], m['Lx'],
+                                     m['Ly'], eulerM)
+                        tra.addModule(mod)
+                    edisk.addTray(tra)
+                
+                tracker.addEndcapDisk(edisk) 
+      
+            for ed in tr['pEndcapDisks']:
+
+                edisk = EndcapDisk(ed['R'], ed['z'], ed['X0'], ed['diskIndex'])
+                
+                for tray in ed['Trays']:
+                    
+                    euler = EulerRotation(tray['psi'], tray['theta'], tray['phi'])
+                    tra = Tray(tray['x'], tray['y'], tray['z'], euler,
+                                tray['TrayWidth'], tray['TrayLength'])
+                     
+                    for m in tray['Modules']:
+                    
+                        eulerM = EulerRotation(m['psi'], m['theta'], m['phi'])
+                        mod = Module(m['x'], m['y'], m['z'], m['Lx'],
+                                     m['Ly'], eulerM)
+                        tra.addModule(mod)
+                    edisk.addTray(tra)
+                
+                tracker.addEndcapDisk(edisk) 
+
+            self.ftr.addTracker(tracker)
+
+
 
     ########################################################################
     def getTracker(self, tr):
@@ -47,7 +139,8 @@ class GeometryTools:
         trs['barrelLZ'] = tr.barrelLZ
         trs['endcapMinR'] = tr.endcapMinR
         trs['endcapMaxR'] = tr.endcapMaxR
-        trs['endcapMinZ'] = tr.endcapMaxZ
+        trs['endcapMinZ'] = tr.endcapMinZ
+        trs['endcapMaxZ'] = tr.endcapMaxZ
         trs['trackerIndex'] = tr.trackerIndex
         trs['nBarrelLayers'] = tr.nBarrelLayers
         trs['barrelLayers'] = []

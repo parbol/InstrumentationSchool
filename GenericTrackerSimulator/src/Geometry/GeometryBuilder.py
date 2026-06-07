@@ -21,14 +21,18 @@ class GeometryBuilder:
     # The geometry will be dumped into a json file with all the information .           #
     #####################################################################################
 
-    def __init__(self):
+    def __init__(self, fileName = ''):
 
         # All units are in cm
         self.ftr = FullTracker()
+
+
+    #####################################################################################
+    def build(self):
         
         tr = Tracker(barrelMinR = 9.0, barrelMaxR = 31.0, barrelLZ = 71, 
                     endcapMinR = 9.0, endcapMaxR = 31.0, 
-                    endcapMinZ = 72.0, endcapMaxZ = 130.0)
+                    endcapMinZ = 72.0, endcapMaxZ = 130.0, index=0)
         
         #################################################################################
         # Looping on the barrel layers                                                  #
@@ -158,7 +162,7 @@ class GeometryBuilder:
                 tm = Tray(x = x, y = y, z = zm, euler = euler, TrayWidth = trayWidth, TrayLength = trayLength)
                 self.makeModulesInTray(tm, nWGap, nLGap, wSizeModule, lSizeModule)
                 blayer.addTray(tp, 1)
-                blayer.addTray(tm, 0)
+                blayer.addTray(tm, -1)
 
 
     ########################################################################################################

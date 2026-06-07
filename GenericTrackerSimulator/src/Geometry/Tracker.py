@@ -7,7 +7,7 @@ logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S
 
 class Tracker:
 
-    def __init__(self, barrelMinR, barrelMaxR, barrelLZ, endcapMinR, endcapMaxR, endcapMinZ, endcapMaxZ):
+    def __init__(self, barrelMinR, barrelMaxR, barrelLZ, endcapMinR, endcapMaxR, endcapMinZ, endcapMaxZ, index):
 
         #######################################################################
         # These parameters represent the tracker envelope:                    #
@@ -28,7 +28,7 @@ class Tracker:
         self.endcapMaxZ = endcapMaxZ
         
         # Id of this tracker
-        self.trackerIndex = 0
+        self.trackerIndex = index
 
         # The tracker contains barrel layers and endcap disks
         self.nBarrelLayers = 0
