@@ -4,8 +4,11 @@
 ############################################################################
 from GenericTrackerSimulator.src.Navigation.navigation import navigation
 from GenericTrackerSimulator.src.Propagation.trajectoryState import trajectoryState
+from GenericTrackerSimulator.src.Propagation.Propagator import Propagator
 from GenericTrackerSimulator.src.Generation.genParticle import genParticle
-
+import logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', encoding='utf-8', level=logging.INFO)
 
 
 class FullTracker:
@@ -13,16 +16,20 @@ class FullTracker:
     def __init__(self, listOfTrackers=[]):
 
         self.trackers = listOfTrackers
-    
+        self.propagator = Propagator(3.8)
+
+    #########################################################    
     def setNavigator(self):
 
         self.navigator = navigation(self.trackers)
 
+    #########################################################    
     def addTracker(self, tr):
 
         tr.trackerIndex = len(self.trackers)
         self.trackers.append(tr)
 
+    #########################################################    
     def propagateParticle(self, particle):
         
         trajState = trajectoryState()
@@ -37,31 +44,38 @@ class FullTracker:
         while valid:
             
             mint = 1e7
-            minLayer = []
-            minTrajState = []
+            minLayer = None
+            minTrajState = None
             valid = False
 
             for l in nextLayers:
-                layer = []
+                # Choose the next possible layer
+                layer = None
                 if l[2] == 0:
-                    layer = self.ftr.trackers[l[0]].barrelLayers[l[1]]
+                    layer = self.trackers[l[0]].barrelLayers[l[1]]
                 elif l[2] == 1:
-                    layer = self.ftr.trackers[l[0]].pEndcapDisks[l[1]]
+                    layer = self.trackers[l[0]].pEndcapDisks[l[1]]
                 elif l[2] == -1:
-                    layer = self.ftr.trackers[l[0]].mEndcapDisks[l[1]]
-                
+                    layer = self.trackers[l[0]].mEndcapDisks[l[1]]
+                # Propagate 
                 newTrajState, validT = self.propagator.propagate(trajState, layer)
+                print('mira tu')
+                newTrajState.print()
                 if validT:
                     valid = True
                     if newTrajState.t >= 0.0 and newTrajState.t < mint:
                         mint = newTrajState.t
                         minLayer = layer
                         minTrajState = newTrajState
-            
-            hit, validHit = self.produceHit(minTrajState, minLayer)
-            if validHit:
-                self.trajectory.addHit(hit)
-            nextLayers = minLayer.connections
+            if minLayer != None:
+                print('Hitted layer', minLayer.barrelIndex)            
+                minTrajState.print()
+                nextLayers = minLayer.connections
+                trajState = minTrajState
+            else:
+                break
+
+
 
     ########################################################################################################
     def draw(self, ax1, ax2, ax3, ax4, t1, t2, alpha=0.2):

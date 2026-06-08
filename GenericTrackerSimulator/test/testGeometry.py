@@ -4,9 +4,13 @@ from GenericTrackerSimulator.src.Geometry.BarrelLayer import BarrelLayer
 from GenericTrackerSimulator.src.Geometry.EndcapDisk import EndcapDisk
 from GenericTrackerSimulator.src.Geometry.GeometryBuilder import GeometryBuilder
 from GenericTrackerSimulator.src.Geometry.GeometryTools import GeometryTools
+from GenericTrackerSimulator.src.Generation.genParticle import genParticle
+
 import matplotlib.pyplot as plt
 import numpy as np
-
+import logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', encoding='utf-8', level=logging.INFO)
 
 
 
@@ -22,6 +26,9 @@ if __name__=='__main__':
     gTools = GeometryTools(gBuilder.ftr)
     gTools.importGeometry('tracker.json')
     gBuilder.ftr.setNavigator()
+
+    p =  genParticle(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10, 0.1, 1, 13)
+    gBuilder.ftr.propagateParticle(p)
 
     #Some global variables
     #fig = plt.figure(figsize = plt.figaspect(0.3))
