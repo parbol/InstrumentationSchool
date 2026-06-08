@@ -21,6 +21,7 @@ if __name__=='__main__':
 
     gTools = GeometryTools(gBuilder.ftr)
     gTools.importGeometry('tracker.json')
+    gBuilder.ftr.setNavigator()
 
     #Some global variables
     #fig = plt.figure(figsize = plt.figaspect(0.3))

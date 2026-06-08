@@ -88,18 +88,20 @@ class Tracker:
         if disk.R > self.endcapMaxR or disk.R < self.endcapMinR or abs(disk.z) < self.endcapMinZ or abs(disk.z) > self.endcapMaxZ:
             logging.error('There was an endcap disk not fitting the tracker volume')
             sys.exit()
-
+        disk.trackerIndex = self.trackerIndex
         if disk.z > 0:
             if self.npEndcapDisks != 0 and disk.z < self.pEndcapDisks[self.npEndcapDisks-1].z:
                 logging.error('A positive disk with lower Z than an existing one has been tried')
                 sys.exit()
             self.pEndcapDisks.append(disk)
+            self.diskIndex = self.npEndcapDisks
             self.npEndcapDisks = self.npEndcapDisks + 1
         else:
             if self.nmEndcapDisks != 0 and disk.z > self.mEndcapDisks[self.nmEndcapDisks-1].z:
                 logging.error('A nevative disk with lower Z than an existing one has been tried')
                 sys.exit()
             self.mEndcapDisks.append(disk)
+            self.diskIndex = self.nmEndcapDisks
             self.nmEndcapDisks = self.nmEndcapDisks + 1
 
         logging.info('Adding an endcap disk to the tracker at Z: %d', disk.z)

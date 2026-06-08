@@ -1,7 +1,7 @@
 
 class genParticle:
 
-    def __init__(self, x, y, z, t, phi, eta, pt, mass, id):
+    def __init__(self, x, y, z, t, phi, eta, pt, mass, q, id):
 
         self.x = x
         self.y = y
@@ -12,6 +12,7 @@ class genParticle:
         self.pt = pt
         self.mass = mass
         self.id = id
+        self.q = q
 
 
   

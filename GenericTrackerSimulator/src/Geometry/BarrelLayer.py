@@ -6,6 +6,7 @@ import sys
 import logging
 
 logger = logging.getLogger(__name__)
+logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', encoding='utf-8', level=logging.INFO)
 
 class BarrelLayer:
     
@@ -22,14 +23,19 @@ class BarrelLayer:
         self.X0 = X0
 
         # Barrel Layer Id
-        self.trackerIndex = 0
+        self.type = 0
+        self.trackerIndex = -1
         self.barrelIndex = index
+        self.endcapIndex = -1
         
         # Barrel contains trays in the positive and negative sides
         self.npTrays = 0
         self.nnTrays = 0
         self.nTrays = []
         self.pTrays = []
+
+        # Navigation
+        self.connections = []
 
         # Sanity checks for barrel information
         if self.R <= 0:
@@ -52,8 +58,8 @@ class BarrelLayer:
             logging.error('The tray is not fitting the layer')
             sys.exit()
 
+        tray.type = self.type
         if zside >= 0:
-            tray.type = 0
             tray.zside = 1
             tray.trayIndex = self.npTrays
             tray.barrelIndex = self.barrelIndex
@@ -61,7 +67,6 @@ class BarrelLayer:
             self.npTrays = self.npTrays + 1
             self.pTrays.append(tray)
         else:
-            tray.type = 0
             tray.zside = 0
             tray.trayIndex = self.nnTrays
             tray.barrelIndex = self.barrelIndex

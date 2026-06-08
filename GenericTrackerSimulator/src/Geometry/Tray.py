@@ -5,6 +5,7 @@ import math
 import sys
 import logging
 logger = logging.getLogger(__name__)
+logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', encoding='utf-8', level=logging.INFO)
 
 
 
@@ -26,12 +27,12 @@ class Tray:
 
 
         # Information of ID
-        self.type = 0
-        self.zside = 0
-        self.trayIndex = 0
-        self.barrelIndex = 0
-        self.diskIndex = 0
-        self.trackerIndex = 0
+        self.type = -1
+        self.zside = -1
+        self.trayIndex = -1
+        self.barrelIndex = -1
+        self.diskIndex = -1
+        self.trackerIndex = -1
         
         # Information of tray dimensions
         self.TrayWidth = TrayWidth
@@ -58,6 +59,12 @@ class Tray:
         #####Add here warnings and protections
        
         module.moduleIndex = self.nModules
+        module.trayIndex = self.trayIndex
+        module.barrelIndex = self.barrelIndex
+        module.diskIndex = self.diskIndex
+        module.trackerIndex = self.trackerIndex
+        module.type = self.type
+        module.zside = self.zside
         self.modules.append(module)
         self.nModules = self.nModules + 1
 

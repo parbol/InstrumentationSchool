@@ -208,19 +208,15 @@ class GeometryBuilder:
                 
             # Create the trays through the center rotation and size
             tp = Tray(x = xp, y = yp, z = disk.z, euler = euler, TrayWidth = xTraySize, TrayLength = trayLength)
-            tp.type = 1
             self.makeModulesInTray(tray=tp, nWGap=nWGap, nLGap=nLGap, wSizeModule=wSizeModule, lSizeModule=lSizeModule)
             disk.addTray(tp)
             tm = Tray(x = xm, y = yp, z = disk.z, euler = euler, TrayWidth = xTraySize, TrayLength = trayLength)
-            tm.type = 1
             self.makeModulesInTray(tray=tm, nWGap=nWGap, nLGap = nLGap, wSizeModule=wSizeModule, lSizeModule=lSizeModule)
             disk.addTray(tm)
             tpm = Tray(x = xp, y = ym, z = disk.z, euler = euler, TrayWidth = xTraySize, TrayLength = trayLength)
-            tpm.type = 1
             self.makeModulesInTray(tray=tpm, nWGap=nWGap, nLGap=nLGap, wSizeModule=wSizeModule, lSizeModule=lSizeModule)
             disk.addTray(tpm)
             tmm = Tray(x = xm, y = ym, z = disk.z, euler = euler, TrayWidth = xTraySize, TrayLength = trayLength)
-            tmm.type = 1
             self.makeModulesInTray(tray=tmm, nWGap=nWGap, nLGap = nLGap, wSizeModule=wSizeModule, lSizeModule=lSizeModule)
             disk.addTray(tmm)
 
@@ -243,9 +239,4 @@ class GeometryBuilder:
                 rmin = (-tray.TrayWidth/2.0 + stepWidth/2.0) * tray.vx + (-tray.TrayLength/2.0 + stepLength/2.0) * tray.vy 
                 rmod = tray.r + rmin + ix * stepWidth * tray.vx + iy * stepLength * tray.vy
                 m = Module(rmod[0], rmod[1], rmod[2], wSizeModule, lSizeModule, tray.eulerAngles)
-                m.trackerIndex = tray.trackerIndex
-                m.barrelIndex = tray.barrelIndex
-                m.diskIndex = tray.diskIndex
-                m.type = tray.type
-                m.zside = tray.zside         
                 tray.addModule(m)
