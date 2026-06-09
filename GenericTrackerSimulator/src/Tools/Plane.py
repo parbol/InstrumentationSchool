@@ -79,7 +79,7 @@ class Plane:
             x = r * (np.sin(w*t - phi0) + np.sin(phi0)) + x0
             y = r * (np.cos(w*t - phi0) - np.cos(phi0)) + y0
             z = vz * t + z0
-            return np.abs(A * x + B * y + C * z + D)
+            return A * x + B * y + C * z + D
         
     
         t_min = 0.0
@@ -95,8 +95,7 @@ class Plane:
         phi = w * t + phi0
         t = t + t0
         
-        newTraj = trajectoryState(x = x, y = y, z = z, t = z, phi = phi, eta = ts.eta, E = ts.E, q = ts.q, beta= ts.beta)       
-        print('we find ')
+        newTraj = trajectoryState(x = x, y = y, z = z, t = t, phi = phi, eta = ts.eta, E = ts.E, q = ts.q, beta= ts.beta)       
         if self.belongsToPlane(x, y, z):
             return newTraj, True
         else:

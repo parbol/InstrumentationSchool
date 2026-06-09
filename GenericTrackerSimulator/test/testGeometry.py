@@ -30,7 +30,7 @@ if __name__=='__main__':
     #gTools.importGeometry('tracker.json')
     gBuilder.ftr.setNavigator()
 
-    p =  genParticle(0.0, 0.0, 0.0, 0.0, 0.0, 0.01, 10.0, 0.1, 1, 13)
+    p =  genParticle(0.0, 0.0, 0.0, 0.0, 0.0, 0.2, 0.5, 0.1, -1, 13)
     gBuilder.ftr.propagateParticle(p)
 
     #Some global variables
@@ -57,5 +57,7 @@ if __name__=='__main__':
 
     #gBuilder.ftr.draw(ax1, ax2, ax3, ax4, t1='b--', t2='r--')
     gBuilder.ftr.drawBarrel(ax1, ax2, ax3, ax4, t='b--')
-    p.drawIntersections(ax1, ax2, ax3, ax4, t='y*')
+    p.drawIntersections(ax1, ax2, ax3, ax4, t='g*')
+    p.draw(gBuilder.ftr.propagator.B, ax1, ax2, ax3, ax4, fmt='r')
+    print('Size:', len(p.intersections))
     plt.show()

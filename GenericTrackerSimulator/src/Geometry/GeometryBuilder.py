@@ -58,12 +58,18 @@ class GeometryBuilder:
             # Radius information
             r = 10 + 5 * i
             
+            # Actual size of tray
+            trayWidth = 2.0 * r * np.sin(PhiTraySize/2.0)
+            trayLength = ZTraySize
+
             # Module information
-            wSizeModule = 2.0
-            nWGap = 0.1
-            lSizeModule = 10.0
-            nLGap = 0.1
-            
+            #wSizeModule = 2.0
+            wSizeModule = (trayWidth - 0.1)/2.0
+            nWGap = 0.0
+            #lSizeModule = 10.0
+            lSizeModule = (trayLength - 0.1)/5.0
+            nLGap = 0.0
+    
             # Building the layer
             bLayer = BarrelLayer(radius=r, Lz = Lz, X0 = X0, index=i)
             

@@ -75,13 +75,13 @@ class FullTracker:
                         minTrajState = newTrajState
             if minLayer != None:
                 print('Reaching Layer', minLayer.type, minLayer.barrelIndex, minLayer.diskIndex, minLayer.R, 'at time', minTrajState.t)
+                particle.layerIntersections.append(minTrajState)
                 m, newTrajStateModule, validModule = self.propagator.finePropagation(trajState, minLayer)
                 if validModule:
                     print('One module was successfull')
                     particle.intersections.append([m, newTrajStateModule])
                     trajState = newTrajStateModule
                 else:
-                    #print('No module was succesfull')
                     trajState = minTrajState
                 nextLayers = minLayer.connections
             else:

@@ -117,7 +117,7 @@ class Propagator:
             finalT = (layer.z - z0)/ts.vZ
         if finalT <= 1e-3:
             return None, False
-        finalPhi = w * finalT + ts.phi
+        finalPhi = -w * finalT + ts.phi
         finalX = R * (np.sin(w*finalT - ts.phi) + np.sin(ts.phi)) + x0
         finalY = R * (np.cos(w*finalT - ts.phi) - np.cos(ts.phi)) + y0
         finalZ = ts.vZ * finalT + z0
@@ -157,24 +157,23 @@ class Propagator:
             newTraj, valid = tray.plane.intersection(self.B, ts)
             if not valid:
                 continue
-            print('Plane extrapolation')
-            newTraj.print()
+            print('holaaaa')
             if tray.isInside(tray.toLocal(np.asarray([newTraj.x, newTraj.y, newTraj.z]))):
+                print('never here')
                 storedTraj.append(newTraj)
                 trays.append(tray)
+                
         for tray in layer.pTrays:
             newTraj, valid = tray.plane.intersection(self.B, ts)
             if not valid:
                 continue
-            print('Plane extrapolation')
-            newTraj.print()
-            
+            print('holaaaa')
             if tray.isInside(tray.toLocal(np.asarray([newTraj.x, newTraj.y, newTraj.z]))):
+                print('never here')
                 storedTraj.append(newTraj)
                 trays.append(tray) 
         
         if len(storedTraj) == 0:
-            print('No tray compatible')
             return None, None, False
         
         tmin = 9999.0
