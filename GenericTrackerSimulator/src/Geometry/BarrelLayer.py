@@ -26,7 +26,7 @@ class BarrelLayer:
         self.type = 0
         self.trackerIndex = -1
         self.barrelIndex = index
-        self.endcapIndex = -1
+        self.diskIndex = -1
         
         # Barrel contains trays in the positive and negative sides
         self.npTrays = 0

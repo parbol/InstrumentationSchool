@@ -22,7 +22,7 @@ if __name__=='__main__':
     gBuilder = GeometryBuilder()
     #If we want to generate a geometry from Geometry Builder
     gBuilder.build()
-    #gTools = GeometryTools(gBuilder.ftr)
+    gTools = GeometryTools(gBuilder.ftr)
     #gTools.exportGeometry('tracker.json')
     #sys.exit()
 
@@ -30,7 +30,7 @@ if __name__=='__main__':
     #gTools.importGeometry('tracker.json')
     gBuilder.ftr.setNavigator()
 
-    p =  genParticle(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10, 0.1, 1, 13)
+    p =  genParticle(0.0, 0.0, 0.0, 0.0, 0.0, 0.01, 10.0, 0.1, 1, 13)
     gBuilder.ftr.propagateParticle(p)
 
     #Some global variables
@@ -56,4 +56,6 @@ if __name__=='__main__':
     ax4.set_ylabel('x [cm]')
 
     #gBuilder.ftr.draw(ax1, ax2, ax3, ax4, t1='b--', t2='r--')
-    #plt.show()
+    gBuilder.ftr.drawBarrel(ax1, ax2, ax3, ax4, t='b--')
+    p.drawIntersections(ax1, ax2, ax3, ax4, t='y*')
+    plt.show()

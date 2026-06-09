@@ -93,7 +93,7 @@ class Propagator:
                     t4 = 1.0 / w * self.convertAngle((ts.phi - np.arccos((y2_c - y_c) / R)))
                     tarr = np.sort(np.array([t1, t2, t3, t4]), axis=None)
                     for ft in tarr:
-                        if ft > 0:
+                        if ft > 1e-3:
                             finalT = ft
                             break
             else:
@@ -109,13 +109,13 @@ class Propagator:
                 t4 = 1.0 / w * self.convertAngle((ts.phi + np.pi - np.arcsin((x2_c - x_c) / R)))
                 tarr = np.sort(np.array([t1, t2, t3, t4]), axis=None)
                 for ft in tarr:
-                    if ft > 0:
+                    if ft > 1e-3:
                         finalT = ft
                         break
         # If the intersection is with the endcap 
         else:
             finalT = (layer.z - z0)/ts.vZ
-        if finalT <= 0:
+        if finalT <= 1e-3:
             return None, False
         finalPhi = w * finalT + ts.phi
         finalX = R * (np.sin(w*finalT - ts.phi) + np.sin(ts.phi)) + x0
@@ -154,11 +154,11 @@ class Propagator:
         storedTraj = []
         trays = []
         for tray in layer.nTrays:
-            print('tray', tray.trayIndex, tray.barrelIndex)
-            print(tray.plane.p[0], tray.plane.p[1], tray.plane.p[2], tray.plane.n[0], tray.plane.n[1], tray.plane.n[2])
             newTraj, valid = tray.plane.intersection(self.B, ts)
             if not valid:
                 continue
+            print('Plane extrapolation')
+            newTraj.print()
             if tray.isInside(tray.toLocal(np.asarray([newTraj.x, newTraj.y, newTraj.z]))):
                 storedTraj.append(newTraj)
                 trays.append(tray)
@@ -166,11 +166,15 @@ class Propagator:
             newTraj, valid = tray.plane.intersection(self.B, ts)
             if not valid:
                 continue
+            print('Plane extrapolation')
+            newTraj.print()
+            
             if tray.isInside(tray.toLocal(np.asarray([newTraj.x, newTraj.y, newTraj.z]))):
                 storedTraj.append(newTraj)
                 trays.append(tray) 
         
         if len(storedTraj) == 0:
+            print('No tray compatible')
             return None, None, False
         
         tmin = 9999.0

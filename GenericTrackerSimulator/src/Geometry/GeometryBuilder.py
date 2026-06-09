@@ -30,14 +30,14 @@ class GeometryBuilder:
     #####################################################################################
     def build(self):
         
-        tr = Tracker(barrelMinR = 9.0, barrelMaxR = 31.0, barrelLZ = 71, 
-                    endcapMinR = 9.0, endcapMaxR = 31.0, 
+        tr = Tracker(barrelMinR = 9.0, barrelMaxR = 41.0, barrelLZ = 71, 
+                    endcapMinR = 9.0, endcapMaxR = 41.0, 
                     endcapMinZ = 72.0, endcapMaxZ = 130.0, index=0)
         
         #################################################################################
         # Looping on the barrel layers                                                  #
         #################################################################################
-        NLayers = 4
+        NLayers = 6
         for i in range(NLayers):
             # Phi information
             NPhiTray = 24
@@ -60,9 +60,9 @@ class GeometryBuilder:
             
             # Module information
             wSizeModule = 2.0
-            nWGap = 1
+            nWGap = 0.1
             lSizeModule = 10.0
-            nLGap = 1
+            nLGap = 0.1
             
             # Building the layer
             bLayer = BarrelLayer(radius=r, Lz = Lz, X0 = X0, index=i)
@@ -93,8 +93,8 @@ class GeometryBuilder:
             X0 = 25.0
 
             # Module information
-            nWGap = 1
-            nLGap = 1
+            nWGap = 0.1
+            nLGap = 0.1
             wSizeModule = 2
             lSizeModule = 2
             diskp = EndcapDisk(radius=r, z=z, X0=X0, index=i)

@@ -59,26 +59,42 @@ class GeometryTools:
                 blayer = BarrelLayer(bl['R'], bl['Lz'], bl['X0'], bl['barrelIndex'])
 
                 for tray in bl['nTrays']:
-                    euler = EulerRotation(tray['psi'], tray['theta'], tray['phi'])
+                    euler = EulerRotation(0.0, 0.0, 0.0)
+                    vx = np.asarray([tray['vx0'], tray['vx1'], tray['vx2']])
+                    vy = np.asarray([tray['vy0'], tray['vy1'], tray['vy2']])
+                    vz = np.asarray([tray['vz0'], tray['vz1'], tray['vz2']])
+                    euler.setFromVectors(vx, vy, vz)
                     tra = Tray(tray['x'], tray['y'], tray['z'], euler,
                                 tray['TrayWidth'], tray['TrayLength'])
                      
                     for m in tray['Modules']:
                     
-                        eulerM = EulerRotation(m['psi'], m['theta'], m['phi'])
+                        eulerM = EulerRotation(0.0, 0.0, 0.0)
+                        vxm = np.asarray([m['vx0'], m['vx1'], m['vx2']])
+                        vym = np.asarray([m['vy0'], m['vy1'], m['vy2']])
+                        vzm = np.asarray([m['vz0'], m['vz1'], m['vz2']])
+                        eulerM.setFromVectors(vxm, vym, vzm)
                         mod = Module(m['x'], m['y'], m['z'], m['Lx'],
                                      m['Ly'], eulerM)
                         tra.addModule(mod)
                     blayer.addTray(tra, -1)
                 
                 for tray in bl['pTrays']:
-                    euler = EulerRotation(tray['psi'], tray['theta'], tray['phi'])
+                    
+                    euler = EulerRotation(0.0, 0.0, 0.0)
+                    vx = np.asarray([tray['vx0'], tray['vx1'], tray['vx2']])
+                    vy = np.asarray([tray['vy0'], tray['vy1'], tray['vy2']])
+                    vz = np.asarray([tray['vz0'], tray['vz1'], tray['vz2']])
+                    euler.setFromVectors(vx, vy, vz)
                     tra = Tray(tray['x'], tray['y'], tray['z'], euler,
                                 tray['TrayWidth'], tray['TrayLength'])
                      
                     for m in tray['Modules']:
-                    
-                        eulerM = EulerRotation(m['psi'], m['theta'], m['phi'])
+                        eulerM = EulerRotation(0.0, 0.0, 0.0)
+                        vxm = np.asarray([m['vx0'], m['vx1'], m['vx2']])
+                        vym = np.asarray([m['vy0'], m['vy1'], m['vy2']])
+                        vzm = np.asarray([m['vz0'], m['vz1'], m['vz2']])
+                        eulerM.setFromVectors(vxm, vym, vzm)
                         mod = Module(m['x'], m['y'], m['z'], m['Lx'],
                                      m['Ly'], eulerM)
                         tra.addModule(mod)
@@ -91,14 +107,20 @@ class GeometryTools:
                 edisk = EndcapDisk(ed['R'], ed['z'], ed['X0'], ed['diskIndex'])
                 
                 for tray in ed['Trays']:
-                    
-                    euler = EulerRotation(tray['psi'], tray['theta'], tray['phi'])
+                    euler = EulerRotation(0.0, 0.0, 0.0)
+                    vx = np.asarray([tray['vx0'], tray['vx1'], tray['vx2']])
+                    vy = np.asarray([tray['vy0'], tray['vy1'], tray['vy2']])
+                    vz = np.asarray([tray['vz0'], tray['vz1'], tray['vz2']])
+                    euler.setFromVectors(vx, vy, vz)
                     tra = Tray(tray['x'], tray['y'], tray['z'], euler,
                                 tray['TrayWidth'], tray['TrayLength'])
                      
                     for m in tray['Modules']:
-                    
-                        eulerM = EulerRotation(m['psi'], m['theta'], m['phi'])
+                        eulerM = EulerRotation(0.0, 0.0, 0.0)
+                        vxm = np.asarray([m['vx0'], m['vx1'], m['vx2']])
+                        vym = np.asarray([m['vy0'], m['vy1'], m['vy2']])
+                        vzm = np.asarray([m['vz0'], m['vz1'], m['vz2']])
+                        eulerM.setFromVectors(vxm, vym, vzm)
                         mod = Module(m['x'], m['y'], m['z'], m['Lx'],
                                      m['Ly'], eulerM)
                         tra.addModule(mod)
@@ -112,13 +134,20 @@ class GeometryTools:
                 
                 for tray in ed['Trays']:
                     
-                    euler = EulerRotation(tray['psi'], tray['theta'], tray['phi'])
+                    euler = EulerRotation(0.0, 0.0, 0.0)
+                    vx = np.asarray([tray['vx0'], tray['vx1'], tray['vx2']])
+                    vy = np.asarray([tray['vy0'], tray['vy1'], tray['vy2']])
+                    vz = np.asarray([tray['vz0'], tray['vz1'], tray['vz2']])
+                    euler.setFromVectors(vx, vy, vz)
                     tra = Tray(tray['x'], tray['y'], tray['z'], euler,
                                 tray['TrayWidth'], tray['TrayLength'])
                      
                     for m in tray['Modules']:
-                    
-                        eulerM = EulerRotation(m['psi'], m['theta'], m['phi'])
+                        eulerM = EulerRotation(0.0, 0.0, 0.0)
+                        vxm = np.asarray([m['vx0'], m['vx1'], m['vx2']])
+                        vym = np.asarray([m['vy0'], m['vy1'], m['vy2']])
+                        vzm = np.asarray([m['vz0'], m['vz1'], m['vz2']])
+                        eulerM.setFromVectors(vxm, vym, vzm)
                         mod = Module(m['x'], m['y'], m['z'], m['Lx'],
                                      m['Ly'], eulerM)
                         tra.addModule(mod)
@@ -218,9 +247,15 @@ class GeometryTools:
         trays['x'] = tray.x
         trays['y'] = tray.y
         trays['z'] = tray.z
-        trays['psi'] = tray.eulerAngles.psi
-        trays['theta'] = tray.eulerAngles.theta
-        trays['phi'] = tray.eulerAngles.phi
+        trays['vx0'] = tray.eulerAngles.vx[0]
+        trays['vx1'] = tray.eulerAngles.vx[1]
+        trays['vx2'] = tray.eulerAngles.vx[2]
+        trays['vy0'] = tray.eulerAngles.vy[0]
+        trays['vy1'] = tray.eulerAngles.vy[1]
+        trays['vy2'] = tray.eulerAngles.vy[2]
+        trays['vz0'] = tray.eulerAngles.vz[0]
+        trays['vz1'] = tray.eulerAngles.vz[1]
+        trays['vz2'] = tray.eulerAngles.vz[2]
         trays['TrayWidth'] = tray.TrayWidth
         trays['TrayLength'] = tray.TrayLength
         trays['nModules'] = tray.nModules
@@ -247,9 +282,16 @@ class GeometryTools:
         module['x'] = m.x
         module['y'] = m.y
         module['z'] = m.z
+        module['vx0'] = m.eulerAngles.vx[0]
+        module['vx1'] = m.eulerAngles.vx[1]
+        module['vx2'] = m.eulerAngles.vx[2]
+        module['vy0'] = m.eulerAngles.vy[0]
+        module['vy1'] = m.eulerAngles.vy[1]
+        module['vy2'] = m.eulerAngles.vy[2]
+        module['vz0'] = m.eulerAngles.vz[0]
+        module['vz1'] = m.eulerAngles.vz[1]
+        module['vz2'] = m.eulerAngles.vz[2]
         module['psi'] = m.eulerAngles.psi
-        module['theta'] = m.eulerAngles.theta
-        module['phi'] = m.eulerAngles.phi
         module['Lx'] = m.Lx
         module['Ly'] = m.Ly
         

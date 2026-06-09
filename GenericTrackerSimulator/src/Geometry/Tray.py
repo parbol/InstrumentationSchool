@@ -23,7 +23,6 @@ class Tray:
         self.vy = euler.apply(np.asarray([0.0, 1.0, 0.0]))
         self.vz = euler.apply(np.asarray([0.0, 0.0, 1.0]))
         self.eulerAngles = euler
-        print('Tray', self.vz[0], self.vz[1], self.vz[2])
         self.plane = Plane(self.x, self.y, self.z, self.vz[0], self.vz[1], self.vz[2])
 
 

@@ -37,7 +37,6 @@ class FullTracker:
         
         valid = True
 
-        goodIntersection = []
         # We start with the first layer of the barrel or
         # the first layers of the endcap (positive and negative)
         nextLayers = [[0, 0, 0], [0, 0, 1], [0, 0, -1]]
@@ -48,7 +47,8 @@ class FullTracker:
             minLayer = None
             minTrajState = None
             valid = False
-            
+            print('----------------- Propagating from: ------------------------------------------------')
+            trajState.print()
             for l in nextLayers:
                 
                 # Choose the next possible layer
@@ -60,7 +60,13 @@ class FullTracker:
                 elif l[2] == -1:
                     layer = self.trackers[l[0]].mEndcapDisks[l[1]]
                 # Propagate 
+                #print('to layer', layer.type, layer.barrelIndex, layer.diskIndex)
                 newTrajState, validT = self.propagator.propagate(trajState, layer)
+                #if validT:
+                #    print('Success and reaching')
+                #    newTrajState.print()
+                #else:
+                #    print('Failed')
                 if validT:
                     valid = True
                     if newTrajState.t >= 0.0 and newTrajState.t < mint:
@@ -68,11 +74,18 @@ class FullTracker:
                         minLayer = layer
                         minTrajState = newTrajState
             if minLayer != None:
-                m, trajState, validModule = self.propagator.finePropagation(trajState, minLayer)
+                print('Reaching Layer', minLayer.type, minLayer.barrelIndex, minLayer.diskIndex, minLayer.R, 'at time', minTrajState.t)
+                m, newTrajStateModule, validModule = self.propagator.finePropagation(trajState, minLayer)
                 if validModule:
-                    goodIntersection.append([m, trajState])
+                    print('One module was successfull')
+                    particle.intersections.append([m, newTrajStateModule])
+                    trajState = newTrajStateModule
+                else:
+                    #print('No module was succesfull')
+                    trajState = minTrajState
                 nextLayers = minLayer.connections
             else:
+                print('No compatible trajectory state was found')
                 break
 
     ########################################################################################################

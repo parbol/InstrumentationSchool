@@ -56,7 +56,7 @@ class Plane:
         self.invrot = np.linalg.inv(self.rot)
 
     def intersection(self, B, ts):
-        print('-------------------------------------------------------------')
+
         # Angular frequency of the helix
         w = ts.q * 0.089880 * B / (ts.gamma * ts.m)
         # Curvature radius
@@ -79,15 +79,11 @@ class Plane:
             x = r * (np.sin(w*t - phi0) + np.sin(phi0)) + x0
             y = r * (np.cos(w*t - phi0) - np.cos(phi0)) + y0
             z = vz * t + z0
-            print(x, y, z)
-            print('caca', A, B, C, D)
-
             return np.abs(A * x + B * y + C * z + D)
         
     
         t_min = 0.0
         t_max = 14.0
-        print('fmin', fmin(t_min), fmin(t_max))
         if fmin(t_min) * fmin(t_max) > 0:
             return None, False
         s = optimize.brentq(fmin, t_min, t_max, full_output=True, disp=True)
@@ -100,7 +96,7 @@ class Plane:
         t = t + t0
         
         newTraj = trajectoryState(x = x, y = y, z = z, t = z, phi = phi, eta = ts.eta, E = ts.E, q = ts.q, beta= ts.beta)       
-    
+        print('we find ')
         if self.belongsToPlane(x, y, z):
             return newTraj, True
         else:
