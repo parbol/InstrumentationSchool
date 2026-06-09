@@ -25,7 +25,7 @@ class Propagator:
         ##### phi -> Direction of the particle in the transverse plane
         ##### eta -> Direction of the particle in the longitudinal plane 
         ##### pt -> transverse momentum
-        ##### charge -> the charge
+        ##### charge ->self.rt = pt / (self.q * b) * (1000.0/2.998) the charge
         #################################################################
         ##### In the z coordinate we have: pz = pt * sinh(eta) and z = pt * sinh(eta) / m * t + z(0)
         #################################################################
@@ -48,21 +48,22 @@ class Propagator:
         R = ts.vT/w
         # Redefine the time in such a way that the trajectory state lives in t = 0
         # In these conditions:
-        x_0 = ts.x 
-        y_0 = ts.y
-        z_0 = ts.z
-        t_0 = ts.t
+        x0 = ts.x 
+        y0 = ts.y
+        z0 = ts.z
+        t0 = ts.t
 
-        x_c = x_0 + R * np.sin(ts.phi)
-        y_c = y_0 - R * np.cos(ts.phi)
+        x_c = x0 + R * np.sin(ts.phi)
+        y_c = y0 - R * np.cos(ts.phi)
 
         # The final time will be stored here
         finalT = 0             
         
         #Estimating the intersection with a circle or with a plane
         if layer.type == 0:
-            
             ri2 = layer.R**2           
+            x_0 = x_c
+            y_0 = y_c
             delta = -R**2 + x_0**2 + y_0**2 + ri2
             ax = 4. * x_0**2 + 4. * y_0**2
             bx = -4. * delta * x_0
@@ -113,15 +114,14 @@ class Propagator:
                         break
         # If the intersection is with the endcap 
         else:
-            finalT = (layer.z - z_0)/ts.vZ
-
+            finalT = (layer.z - z0)/ts.vZ
+        if finalT <= 0:
+            return None, False
         finalPhi = w * finalT + ts.phi
-        finalX = R * (np.sin(w*finalT - ts.phi) + np.sin(ts.phi)) + x_0
-        finalY = R * (np.cos(w*finalT - ts.phi) - np.cos(ts.phi)) + y_0
-        finalZ = ts.vZ * finalT + z_0
-        finalT = finalT + t_0
-         ##### x(t) = Pt/qB [sin(wt - phi) + sin(phi)] + x(0)
-        ##### y(t) = Pt/qB [cos(wt - phi) - cos(phi)] + y(0)
+        finalX = R * (np.sin(w*finalT - ts.phi) + np.sin(ts.phi)) + x0
+        finalY = R * (np.cos(w*finalT - ts.phi) - np.cos(ts.phi)) + y0
+        finalZ = ts.vZ * finalT + z0
+        finalT = finalT + t0
         # Build new trajectoy State
         newTs = trajectoryState(x = finalX, y = finalY, z = finalZ, t = finalT, phi = finalPhi, eta = ts.eta, E = ts.E, q = ts.q, beta = ts.beta)
 
@@ -135,4 +135,86 @@ class Propagator:
             return theta + np.pi * 2.0
         return theta 
 
-  
+    ###############################################################
+    def finePropagation(self, ts, layer):
+
+        if layer.type == 0:
+
+            m, newts, valid = self.finePropagationBarrel(ts, layer)
+            return m, newts, valid
+        
+        else:
+
+            m, newts, valid = self.finePropagationEndcap(ts, layer)
+            return m, newts, valid
+        
+    ###############################################################
+    def finePropagationBarrel(self, ts, layer):
+
+        storedTraj = []
+        trays = []
+        for tray in layer.nTrays:
+            print('tray', tray.trayIndex, tray.barrelIndex)
+            print(tray.plane.p[0], tray.plane.p[1], tray.plane.p[2], tray.plane.n[0], tray.plane.n[1], tray.plane.n[2])
+            newTraj, valid = tray.plane.intersection(self.B, ts)
+            if not valid:
+                continue
+            if tray.isInside(tray.toLocal(np.asarray([newTraj.x, newTraj.y, newTraj.z]))):
+                storedTraj.append(newTraj)
+                trays.append(tray)
+        for tray in layer.pTrays:
+            newTraj, valid = tray.plane.intersection(self.B, ts)
+            if not valid:
+                continue
+            if tray.isInside(tray.toLocal(np.asarray([newTraj.x, newTraj.y, newTraj.z]))):
+                storedTraj.append(newTraj)
+                trays.append(tray) 
+        
+        if len(storedTraj) == 0:
+            return None, None, False
+        
+        tmin = 9999.0
+        theTray = None
+        theTraj = None
+        for i, ts in enumerate(storedTraj):
+            if ts.t < tmin:
+                tmin = ts.t
+                theTray = trays[i]
+                theTraj = ts
+        
+        for m in theTray.modules:
+            if m.isInside(m.toLocal(np.asarray([theTraj.x, theTraj.y, theTraj.z]))):
+                return m, theTraj, True
+            
+        return None, None, False        
+        
+                
+    ###############################################################
+    def finePropagationEndcap(self, ts, layer):
+
+        storedTraj = []
+        trays = []
+        for tray in layer.Trays:
+            newTraj, valid = tray.plane.intersection(self.B, ts)
+            if not valid:
+                continue
+            if tray.isInside(tray.toLocal(np.asarray([newTraj.x, newTraj.y, newTraj.z]))):
+                storedTraj.append(newTraj)
+                trays.append(tray)
+        if len(storedTraj) == 0:
+            return None, None, False
+        tmin = 9999.0
+        theTray = None
+        theTraj = None
+        for i, ts in enumerate(storedTraj):
+            if ts.t < tmin:
+                tmin = ts.t
+                theTray = trays[i]
+                theTraj = ts
+        
+        for m in theTray.modules:
+            if m.isInside(m.toLocal(np.asarray([theTraj.x, theTraj.y, theTraj.z]))):
+                return m, theTraj, True
+            
+        return None, None, False        
+          

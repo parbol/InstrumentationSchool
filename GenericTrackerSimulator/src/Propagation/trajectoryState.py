@@ -39,6 +39,9 @@ class trajectoryState:
         self.vT = self.beta * np.sin(self.theta) * self.c
         self.vZ = self.beta * np.cos(self.theta) * self.c
         self.m = self.E / self.gamma
+        self.p = np.sqrt(self.E**2 - self.m**2)
+        self.pt = self.p * np.sin(self.theta)
+        self.pz = self.p * np.cos(self.theta)
 
     ###################################################################
     def fromGenParticle(self, p):

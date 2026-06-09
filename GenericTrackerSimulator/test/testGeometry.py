@@ -9,6 +9,8 @@ from GenericTrackerSimulator.src.Generation.genParticle import genParticle
 import matplotlib.pyplot as plt
 import numpy as np
 import logging
+import sys
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', encoding='utf-8', level=logging.INFO)
 
@@ -19,12 +21,13 @@ if __name__=='__main__':
 
     gBuilder = GeometryBuilder()
     #If we want to generate a geometry from Geometry Builder
-    #gBuilder.build()
+    gBuilder.build()
     #gTools = GeometryTools(gBuilder.ftr)
     #gTools.exportGeometry('tracker.json')
+    #sys.exit()
 
-    gTools = GeometryTools(gBuilder.ftr)
-    gTools.importGeometry('tracker.json')
+    #gTools = GeometryTools(gBuilder.ftr)
+    #gTools.importGeometry('tracker.json')
     gBuilder.ftr.setNavigator()
 
     p =  genParticle(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10, 0.1, 1, 13)
@@ -52,5 +55,5 @@ if __name__=='__main__':
     ax4.set_xlabel('z [cm]')
     ax4.set_ylabel('x [cm]')
 
-    gBuilder.ftr.draw(ax1, ax2, ax3, ax4, t1='b--', t2='r--')
-    plt.show()
+    #gBuilder.ftr.draw(ax1, ax2, ax3, ax4, t1='b--', t2='r--')
+    #plt.show()

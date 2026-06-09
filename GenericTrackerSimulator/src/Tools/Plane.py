@@ -1,8 +1,12 @@
 import numpy as np
 import sys
+
+from GenericTrackerSimulator.src.Propagation.trajectoryState import trajectoryState
 from scipy import optimize
 
-from TrackerSimulator.src.Track import Track
+import logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', encoding='utf-8', level=logging.INFO)
 
 class Plane:
 
@@ -12,7 +16,7 @@ class Plane:
         self.n = np.asarray([nx, ny, nz])
         s = self.norm(self.n)
         if s < 1e-5:
-            print('Bad plane definition')
+            logging.error('Bad plane definition')
             sys.exit()
         self.n = self.n / s
         self.rotMatrix()
@@ -23,7 +27,7 @@ class Plane:
         self.n = np.asarray([nx, ny, nz])
         s = self.norm(self.n)
         if s < 1e-5:
-            print('Bad plane definition')
+            logging.error('Bad plane definition')
             sys.exit()
         self.n = self.n / s
         self.rotMatrix()
@@ -51,41 +55,56 @@ class Plane:
         self.rot = np.asmatrix(mat)
         self.invrot = np.linalg.inv(self.rot)
 
-    def intersection(self, track):
-
+    def intersection(self, B, ts):
+        print('-------------------------------------------------------------')
+        # Angular frequency of the helix
+        w = ts.q * 0.089880 * B / (ts.gamma * ts.m)
+        # Curvature radius
+        r = ts.vT/w
+        # phi
+        phi0 = ts.phi
+        # vz
+        vz = ts.vZ
+        # vector
+        x0 = ts.x
+        y0 = ts.y
+        z0 = ts.z
+        t0 = ts.t
         def fmin(t):
         
             A = self.n[0]
             B = self.n[1]
             C = self.n[2]
             D = -(A*self.p[0]+B*self.p[1]+C*self.p[2])
-            r = track.rt
-            w = track.w
-            phi = track.phi
-            pzct = (29.98/(track.gamma*track.m)) * track.pz
-            x0 = track.x_c
-            y0 = track.y_c
-            z0 = track.dz
-            Delta = A * x0 + B * y0 + C * z0
-            return Delta + D + A * r * np.sin(w*t-phi) + B * r * np.cos(w*t-phi) + C * pzct * t
-    
-    
-        
-        #t_min = (track.gamma*track.m) / (29.98*track.pz) * (z_min - track.dz)
-        #t_max = (track.gamma*track.m) / (29.98*track.pz) * (z_max - track.dz)
-        #ftmin = fmin(t_min)
+            x = r * (np.sin(w*t - phi0) + np.sin(phi0)) + x0
+            y = r * (np.cos(w*t - phi0) - np.cos(phi0)) + y0
+            z = vz * t + z0
+            print(x, y, z)
+            print('caca', A, B, C, D)
 
+            return np.abs(A * x + B * y + C * z + D)
+        
+    
         t_min = 0.0
         t_max = 14.0
+        print('fmin', fmin(t_min), fmin(t_max))
         if fmin(t_min) * fmin(t_max) > 0:
-            return False, -1.0, -1.0, -1.0, -1.0
+            return None, False
         s = optimize.brentq(fmin, t_min, t_max, full_output=True, disp=True)
+        
         t = s[0]
-        x,y,z = track.eval(t)           
+        x = r * (np.sin(w*t - phi0) + np.sin(phi0)) + x0
+        y = r * (np.cos(w*t - phi0) - np.cos(phi0)) + y0
+        z = vz * t + z0
+        phi = w * t + phi0
+        t = t + t0
+        
+        newTraj = trajectoryState(x = x, y = y, z = z, t = z, phi = phi, eta = ts.eta, E = ts.E, q = ts.q, beta= ts.beta)       
+    
         if self.belongsToPlane(x, y, z):
-            return True, x, y, z, t
+            return newTraj, True
         else:
-            return False, x, y, z, t
+            return None, False
 
 
     def intersectionStraight(self, x0, y0, z0, vx, vy, vz):

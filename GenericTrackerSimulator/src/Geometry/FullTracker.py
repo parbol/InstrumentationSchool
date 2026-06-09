@@ -37,6 +37,7 @@ class FullTracker:
         
         valid = True
 
+        goodIntersection = []
         # We start with the first layer of the barrel or
         # the first layers of the endcap (positive and negative)
         nextLayers = [[0, 0, 0], [0, 0, 1], [0, 0, -1]]
@@ -47,8 +48,9 @@ class FullTracker:
             minLayer = None
             minTrajState = None
             valid = False
-
+            
             for l in nextLayers:
+                
                 # Choose the next possible layer
                 layer = None
                 if l[2] == 0:
@@ -59,8 +61,6 @@ class FullTracker:
                     layer = self.trackers[l[0]].mEndcapDisks[l[1]]
                 # Propagate 
                 newTrajState, validT = self.propagator.propagate(trajState, layer)
-                print('mira tu')
-                newTrajState.print()
                 if validT:
                     valid = True
                     if newTrajState.t >= 0.0 and newTrajState.t < mint:
@@ -68,14 +68,12 @@ class FullTracker:
                         minLayer = layer
                         minTrajState = newTrajState
             if minLayer != None:
-                print('Hitted layer', minLayer.barrelIndex)            
-                minTrajState.print()
+                m, trajState, validModule = self.propagator.finePropagation(trajState, minLayer)
+                if validModule:
+                    goodIntersection.append([m, trajState])
                 nextLayers = minLayer.connections
-                trajState = minTrajState
             else:
                 break
-
-
 
     ########################################################################################################
     def draw(self, ax1, ax2, ax3, ax4, t1, t2, alpha=0.2):

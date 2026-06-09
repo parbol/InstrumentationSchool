@@ -23,6 +23,7 @@ class Tray:
         self.vy = euler.apply(np.asarray([0.0, 1.0, 0.0]))
         self.vz = euler.apply(np.asarray([0.0, 0.0, 1.0]))
         self.eulerAngles = euler
+        print('Tray', self.vz[0], self.vz[1], self.vz[2])
         self.plane = Plane(self.x, self.y, self.z, self.vz[0], self.vz[1], self.vz[2])
 
 
@@ -71,7 +72,27 @@ class Tray:
         logging.info('A module has been added at position x: %f, y: %f, z: %f', module.x, module.y, module.z)
    
  
-   
+    ########################################################################################################
+    def toGlobal(self, v):
+
+        return self.r + self.eulerAngles.apply(v)
+
+
+    ########################################################################################################
+    def toLocal(self, v):
+
+        return self.eulerAngles.applyInverse(v - self.r)
+    
+
+    ########################################################################################################
+    def isInside(self, p):
+
+        if p[0] < -self.TrayWidth/2.0 or p[0] > self.TrayWidth/2.0:
+            return False
+        if p[1] < -self.TrayLength/2.0 or p[1] > self.TrayLength/2.0:
+            return False
+        return True
+
  
     ########################################################################################################
     def draw(self, ax1, ax2, ax3, ax4, t, alpha=0.2):
