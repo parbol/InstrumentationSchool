@@ -48,7 +48,7 @@ class LGADSimulator:
         if self.signalMax * charge <= self.threshold:
            return 0, -1
         samplingSpace = self.signalTMax + 20.0*self.taud
-        samplingStep = self.clock/100.0
+        samplingStep = 1.0/self.clock
         toa = 0.0
         l = 0.0
         while l < samplingSpace:
