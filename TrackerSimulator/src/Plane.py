@@ -80,6 +80,7 @@ class Plane:
         if fmin(t_min) * fmin(t_max) > 0:
             return False, -1.0, -1.0, -1.0, -1.0
         s = optimize.brentq(fmin, t_min, t_max, full_output=True, disp=True)
+        print('Minimum', fmin(s[0]))
         t = s[0]
         x,y,z = track.eval(t)           
         if self.belongsToPlane(x, y, z):
