@@ -65,5 +65,5 @@ class trajectoryState:
     ###################################################################
     def print(self):
         
-        print(f'Trajectory state ({self.x}, {self.y}, {self.z}, {self.t})')
+        print(f'Trajectory state ({self.x}, {self.y}, {self.z}, {self.t}, {self.vZ})')
       

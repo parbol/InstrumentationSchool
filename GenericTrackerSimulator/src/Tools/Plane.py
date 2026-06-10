@@ -83,18 +83,22 @@ class Plane:
         
     
         t_min = 0.0
-        t_max = 14.0
-        if fmin(t_min) * fmin(t_max) > 0:
-            return None, False
+        step = 0.01 
+        tl = t_min + step
+        t_max = 30.0
+        while fmin(t_min) * fmin(tl) > 0:
+            tl = tl + step
+            if tl > t_max:
+                return None, False
+        t_min = tl - 2.0 * step
+        t_max = tl + 2.0 * step
         s = optimize.brentq(fmin, t_min, t_max, full_output=True, disp=True)
-        
         t = s[0]
         x = r * (np.sin(w*t - phi0) + np.sin(phi0)) + x0
         y = r * (np.cos(w*t - phi0) - np.cos(phi0)) + y0
         z = vz * t + z0
-        phi = w * t + phi0
+        phi = -w * t + phi0
         t = t + t0
-        
         newTraj = trajectoryState(x = x, y = y, z = z, t = t, phi = phi, eta = ts.eta, E = ts.E, q = ts.q, beta= ts.beta)       
         if self.belongsToPlane(x, y, z):
             return newTraj, True

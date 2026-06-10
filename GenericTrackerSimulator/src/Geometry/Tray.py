@@ -79,14 +79,13 @@ class Tray:
 
     ########################################################################################################
     def toLocal(self, v):
-
+      
         return self.eulerAngles.applyInverse(v - self.r)
     
 
     ########################################################################################################
     def isInside(self, p):
-        print('TrayWidth', self.TrayWidth/2.0, 'TrayLength', self.TrayLength/2.0)
-        print(p)
+     
         if p[0] < -self.TrayWidth/2.0 or p[0] > self.TrayWidth/2.0:
             return False
         if p[1] < -self.TrayLength/2.0 or p[1] > self.TrayLength/2.0:

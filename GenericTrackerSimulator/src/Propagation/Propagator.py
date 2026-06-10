@@ -149,7 +149,7 @@ class Propagator:
             return m, newts, valid
         
     ###############################################################
-    def finePropagationBarrel(self, ts, layer):
+    def finePropagationBarrel(self, ts, layer):     
 
         storedTraj = []
         trays = []
@@ -157,9 +157,7 @@ class Propagator:
             newTraj, valid = tray.plane.intersection(self.B, ts)
             if not valid:
                 continue
-            print('holaaaa')
             if tray.isInside(tray.toLocal(np.asarray([newTraj.x, newTraj.y, newTraj.z]))):
-                print('never here')
                 storedTraj.append(newTraj)
                 trays.append(tray)
                 
@@ -167,9 +165,8 @@ class Propagator:
             newTraj, valid = tray.plane.intersection(self.B, ts)
             if not valid:
                 continue
-            print('holaaaa')
+            
             if tray.isInside(tray.toLocal(np.asarray([newTraj.x, newTraj.y, newTraj.z]))):
-                print('never here')
                 storedTraj.append(newTraj)
                 trays.append(tray) 
         
