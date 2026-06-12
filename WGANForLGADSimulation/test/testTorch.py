@@ -12,20 +12,22 @@ cuda = True if torch.cuda.is_available() else False # GPU Setting
 
 ####################Parameters######################
 batch_size=8192
+batch_size=1024
 #12 dimensions for the latent_space
 latent_dim = 12
+latent_dim = 6
 #3 conditional variables: p, phi and t
 conditional_dim = 3
 #2 output variables: toa, tot
 output_dim = 2
 #Learning rate
-lr = 0.0001
+lr = 0.0005
 #Number of epochs
-n_epochs=400
+n_epochs=200
 #N steps generation
 nstepsgen = 1
 #N steps discriminator
-nstepsdis = 2
+nstepsdis = 5
 ####################Parameters######################
 
 if __name__=='__main__':

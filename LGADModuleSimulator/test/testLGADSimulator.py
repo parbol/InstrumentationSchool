@@ -15,18 +15,24 @@ if __name__ == "__main__":
 
     (opts, args) = parser.parse_args()
     #Some global variables
+   
     
-    lgad = LGADSimulator(thickness=0.3, radius=1.0, 
-                        intLumi = 0.0, taur = 2.0,
-                        taud=3.0, clock=3.0,
+    model1 = LGADSimulator(thickness=0.3, radius=1.0,
+                        intLumi = 0.0, taur = 2.5,
+                        taud=4.0, clock=3.0,
                         threshold=0.9525, noiseLevel=0.2750, sigmaTDC=0.010)
-    
+
+    model2 = LGADSimulator(thickness=0.3, radius=1.0,
+                        intLumi = 0.0, taur = 3.0,
+                        taud=8.0, clock=3.0,
+                        threshold=0.9525, noiseLevel=0.2750, sigmaTDC=0.010)
+
     events = dict()
     events['id'] = []
     events['p'] = []
     events['phi'] = []
     events['t'] = []
-    events['toa'] = []
+    events['toat'] = []
     events['tot'] = []
 
     eventCounter = 0
@@ -35,7 +41,6 @@ if __name__ == "__main__":
         #We select the kind of particle
         p = np.random.uniform(1.0, 20) #GeV
         idselect = np.random.uniform(0, 1)
-        id = 0
         idselect = 0.9
         if idselect < 0.03:
             id = 13
@@ -47,18 +52,19 @@ if __name__ == "__main__":
             id = 2212
         else:
             id = 121
+        id = 121
         phi = np.random.normal(0, np.pi/12.0)
         if abs(phi) > np.pi/4.0:
             continue
         t = np.random.uniform(1, 5) #ns
-        toa, tot, charge = lgad.getResponse(id, p, phi, t)
+        toa, tot, charge = model1.getResponse(id, p, phi, t)
         if charge == -1 or abs(toa)>100.0 or abs(tot)>100.0:
             continue
         events['id'].append(id)
         events['p'].append(p)
         events['phi'].append(phi)
         events['t'].append(t)
-        events['toa'].append(toa)
+        events['toat'].append(toa-t)
         events['tot'].append(tot)
         eventCounter = eventCounter + 1
    
