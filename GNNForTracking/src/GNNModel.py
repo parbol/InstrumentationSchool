@@ -27,7 +27,7 @@ class EdgeDecoder(torch.nn.Module):
         return z.view(-1)
 
 
-class Model(torch.nn.Module):
+class GNNModel(torch.nn.Module):
     def __init__(self, hidden_channels):
         super().__init__()
         self.encoder = GNNEncoder(hidden_channels, hidden_channels)
