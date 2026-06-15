@@ -81,7 +81,6 @@ if __name__=='__main__':
     particle['label'] = []
 
     while counter < nParticles:
-        print('Counter', counter)
         x = y = z = t = 0
         phi = np.random.uniform(0.0, 2.0*np.pi)
         eta = np.random.uniform(-0.5, 0.5)

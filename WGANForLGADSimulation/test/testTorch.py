@@ -75,7 +75,6 @@ if __name__=='__main__':
                 fakeEventCat = discriminator(fakeEvents.detach())
                 realEventCat = discriminator(realEvents)
                 f_loss = torch.mean(fakeEventCat) - torch.mean(realEventCat)
-                #d_loss = f_loss + 10.0 * gradient_penalty(discriminator, realEvents, fakeEvents.detach())
                 f_loss.backward()
                 discriminator_optimizer.step()
                 d_l = f_loss.item()
