@@ -1,3 +1,4 @@
+import torch
 from torch_geometric.nn import SAGEConv, to_hetero
 
 class GNNEncoder(torch.nn.Module):
@@ -28,10 +29,10 @@ class EdgeDecoder(torch.nn.Module):
 
 
 class GNNModel(torch.nn.Module):
-    def __init__(self, hidden_channels):
+    def __init__(self, metadata, hidden_channels):
         super().__init__()
         self.encoder = GNNEncoder(hidden_channels, hidden_channels)
-        self.encoder = to_hetero(self.encoder, train_data.metadata(), aggr='sum')
+        self.encoder = to_hetero(self.encoder, metadata, aggr='sum')
         self.decoder = EdgeDecoder(hidden_channels)
 
     def forward(self, x_dict, edge_index_dict, edge_label_index):

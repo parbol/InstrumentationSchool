@@ -23,7 +23,7 @@ if __name__=='__main__':
 
     parser = optparse.OptionParser(usage='usage: %prog [options] path', version='%prog 1.0')
     parser.add_option('-n', '--nevents', action='store', type=int,      dest='nEvents',    default=10,            help='Number of events')
-    parser.add_option('-o', '--output',  action='store', type='string', dest='outputFile', default='output.root', help='Name of output file.')
+    parser.add_option('-o', '--output',  action='store', type='string', dest='outputFile', default='output.parquet', help='Name of output file.')
 
     (opts, args) = parser.parse_args()
     #Some global variables
@@ -71,14 +71,14 @@ if __name__=='__main__':
     counter = 0
     nLayers = 6
     particle = dict()
-    particle['pNumber'] = []
+    particle['particle'] = []
     particle['x'] = []
     particle['y'] = []
     particle['z'] = []
     particle['layer'] = []
     particle['pt'] = []
     particle['charge'] = []
-    particle['node'] = []
+    particle['label'] = []
 
     while counter < nParticles:
         print('Counter', counter)
@@ -96,14 +96,14 @@ if __name__=='__main__':
         for i, ts in enumerate(p.layerIntersections):
             print(i)
             mod = p.intersections[i][0]
-            particle['pNumber'].append(counter)
+            particle['particle'].append(counter)
             particle['x'].append(ts.x)
             particle['y'].append(ts.y)
             particle['z'].append(ts.z)
             particle['layer'].append(mod.barrelIndex)
             particle['pt'].append(ts.pt)
             particle['charge'].append(ts.q)
-            particle['node'].append(counterNodes)
+            particle['label'].append(counterNodes)
             counterNodes = counterNodes + 1   
         p.drawIntersections(ax1, ax2, ax3, ax4, t='g*')
         p.draw(gBuilder.ftr.propagator.B, ax1, ax2, ax3, ax4, fmt='r')

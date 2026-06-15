@@ -164,11 +164,12 @@ class GeometryBuilder:
                 
                 # Create the trays through the center rotation and size
                 tp = Tray(x = x, y = y, z = zp, euler = euler, TrayWidth = trayWidth, TrayLength = trayLength)
+                blayer.addTray(tp, 1)
                 self.makeModulesInTray(tp, nWGap, nLGap, wSizeModule, lSizeModule)
                 tm = Tray(x = x, y = y, z = zm, euler = euler, TrayWidth = trayWidth, TrayLength = trayLength)
-                self.makeModulesInTray(tm, nWGap, nLGap, wSizeModule, lSizeModule)
-                blayer.addTray(tp, 1)
                 blayer.addTray(tm, -1)
+                self.makeModulesInTray(tm, nWGap, nLGap, wSizeModule, lSizeModule)
+                
 
 
     ########################################################################################################
@@ -214,17 +215,17 @@ class GeometryBuilder:
                 
             # Create the trays through the center rotation and size
             tp = Tray(x = xp, y = yp, z = disk.z, euler = euler, TrayWidth = xTraySize, TrayLength = trayLength)
-            self.makeModulesInTray(tray=tp, nWGap=nWGap, nLGap=nLGap, wSizeModule=wSizeModule, lSizeModule=lSizeModule)
             disk.addTray(tp)
+            self.makeModulesInTray(tray=tp, nWGap=nWGap, nLGap=nLGap, wSizeModule=wSizeModule, lSizeModule=lSizeModule)
             tm = Tray(x = xm, y = yp, z = disk.z, euler = euler, TrayWidth = xTraySize, TrayLength = trayLength)
-            self.makeModulesInTray(tray=tm, nWGap=nWGap, nLGap = nLGap, wSizeModule=wSizeModule, lSizeModule=lSizeModule)
             disk.addTray(tm)
+            self.makeModulesInTray(tray=tm, nWGap=nWGap, nLGap = nLGap, wSizeModule=wSizeModule, lSizeModule=lSizeModule)
             tpm = Tray(x = xp, y = ym, z = disk.z, euler = euler, TrayWidth = xTraySize, TrayLength = trayLength)
+            disk.addTray(tpm)            
             self.makeModulesInTray(tray=tpm, nWGap=nWGap, nLGap=nLGap, wSizeModule=wSizeModule, lSizeModule=lSizeModule)
-            disk.addTray(tpm)
             tmm = Tray(x = xm, y = ym, z = disk.z, euler = euler, TrayWidth = xTraySize, TrayLength = trayLength)
+            disk.addTray(tmm)            
             self.makeModulesInTray(tray=tmm, nWGap=nWGap, nLGap = nLGap, wSizeModule=wSizeModule, lSizeModule=lSizeModule)
-            disk.addTray(tmm)
 
     
 

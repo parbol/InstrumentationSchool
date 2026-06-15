@@ -8,70 +8,82 @@ from torch_geometric.data import HeteroData
 
 class DataBuilder:
 
-    def __init__(self, filename):
+    def __init__(self, filename, phi_window):
          
-    df = pd.read_parquet(filename)
-    
-    #Round the values of the dataset to 4 decimal places
-    df = df.round(4)
-    
-    ##Add a column to use as index from 0 to the length of the dataset
-    #df['n_label'] = range(0, len(df))
-    
-    #Empty hetero graph 
-    data=HeteroData()
+        self.filename = filename
+        self.phi_window = phi_window 
 
-    #node names
-    nodes_s=df['n_label'].values
-    nodes_t=df['n_label'].values
+    def build(self):
+        
+        df = pd.read_parquet(self.filename)
+        df = df.reset_index()  # Make sure indexes pair with number of rows
+        
+        #Round the values of the dataset to 4 decimal places
+        #df = df.round(4)
     
-    #Add nodes to the graph
-    data['source'].node_id = torch.tensor(nodes_s, dtype=torch.long)
-    data['target'].node_id = torch.tensor(nodes_t, dtype=torch.long)
+        ##Add a column to use as index from 0 to the length of the dataset
+        #df['n_label'] = range(0, len(df))
     
-    #Add node attributes, in this case the position of the points
-    data['source'].x = torch.Tensor(df[['x', 'y', 'z']].values)
-    data['target'].x = torch.Tensor(df[['x', 'y', 'z']].values)
+        #Empty hetero graph 
+        data=HeteroData()
+
+        #node names
+        nodes_s=df['label'].values
+        nodes_t=df['label'].values
+
+        #Add nodes to the graph
+        data['source'].node_id = torch.tensor(nodes_s, dtype=torch.long)
+        data['target'].node_id = torch.tensor(nodes_t, dtype=torch.long)
     
-    # Creating the edge structure
-    phi_window = 45 * np.pi/180.0
-    for row in df.rows:
-        if row['layer'] == 0:
-            phi = np.atan2(row['y'], row['x'])
-            for row2 in df.rows:
-                if row['layer'] <= row2['layer']:
+        #Add node attributes, in this case the position of the points
+        data['source'].x = torch.Tensor(np.copy(df[['x', 'y', 'z']].values))
+        data['target'].x = torch.Tensor(np.copy(df[['x', 'y', 'z']].values))
+    
+        # Creating the edge structure for those points in a phi window with respect to the see
+        phi_window = self.phi_window * np.pi/180.0
+        uprow = []
+        downrow = []
+        weight = []
+        for index, row in df.iterrows():
+            p1 = np.asarray([row['x'], row['y']])
+            #phi1 = np.atan2(row['y'], row['x'])
+            node1 = row['label']
+            for jindex, row2 in df.iterrows():
+                if abs(row['layer'] + 1 - row2['layer']) > 0.5:
                     continue
-                phi2 = np.atan2(row2['y'], row2['x'])
-                phi2pos = np.asarray([np.cos(phi2), np.sin(phi2)])
-                phimax = phi + phi_window/2.0
-                phimaxois = np.asarray([np.cos(phi2), np.sin(phi2)])
-                phitest = phi2
-                if phitest < 0.0:
-                    phitest = phitest + np.pi * 2.0
-                if phitest > phimax 
+                p2 = np.asarray([row2['x'], row2['y']])
+                DeltaP = p2 - p1
+                phi = np.acos(np.dot(p1, DeltaP)/(np.linalg.norm(p1)*np.linalg.norm(DeltaP)))    
+                if phi < phi_window/2.0:
+                    node2 = row2['label']
+                    uprow.append(node1)
+                    downrow.append(node2)
+                    weight.append(0.5)
+        
+        
+        edge_index = torch.tensor([uprow, downrow], dtype=torch.long)
+        weight_val = torch.tensor(weight, dtype=torch.float)
 
-                phimin = phi - phi_window/2.0
-                if phi < phimax
-
-
-                
+        
+        data['source', 'weight', 'target'].edge_index = edge_index
+        data['source', 'weight', 'target'].edge_label = weight_val
     
-    
-    df_edge = pd.read_parquet(edge_path)
-    df_edge = df_edge.replace({'weight':0.5}, 0.)
+                        
+        #check if the data is valid
+        print('The data looks good', data.validate(raise_on_error=True))
 
-    edge_index = torch.tensor([df_edge['Source'], df_edge['Target']], dtype=torch.long)
-    data['source', 'weight', 'target'].edge_index = edge_index
-    
-    #edge attributes
-    weight_val = torch.from_numpy(df_edge['weight'].values).to(torch.float)
-    
-    data['source', 'weight', 'target'].edge_label = weight_val
-    
-    #check if the data is valid
-    print(data.validate(raise_on_error=True))
+        data = T.ToUndirected()(data)
+        del data['target', 'rev_weight', 'source'].edge_label
 
-    data = T.ToUndirected()(data)
-    del data['target', 'rev_weight', 'source'].edge_label
+        return data
 
-    return data
+
+    ########################################################################################                  
+    def DeltaPhi(self, phi1, phi2):
+
+        x1 = np.asarray([np.cos(phi1), np.sin(phi1)])
+        x2 = np.asarray([np.cos(phi2), np.sin(phi2)])
+        return np.acos(np.dot(x1, x2))
+    
+
+
