@@ -16,8 +16,8 @@ cuda = True if torch.cuda.is_available() else False # GPU Setting
 
 ####################Parameters######################
 batch_size=1024
-#6 dimensions for the latent_space
-#latent_dim = 6
+#12 dimensions for the latent_space
+latent_dim = 12
 #3 conditional variables: p, phi and t
 conditional_dim = 3
 #2 output variables: toa-t, tot
