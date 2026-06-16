@@ -7,18 +7,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 
+seed = 24412345
+np.random.seed(seed)
+torch.manual_seed(seed)
+
 
 cuda = True if torch.cuda.is_available() else False # GPU Setting
 
 ####################Parameters######################
-batch_size=8192
 batch_size=1024
-#12 dimensions for the latent_space
-latent_dim = 12
-latent_dim = 6
+#6 dimensions for the latent_space
+#latent_dim = 6
 #3 conditional variables: p, phi and t
 conditional_dim = 3
-#2 output variables: toa, tot
+#2 output variables: toa-t, tot
 output_dim = 2
 #Learning rate
 lr = 0.0005
@@ -78,7 +80,7 @@ if __name__=='__main__':
                 f_loss.backward()
                 discriminator_optimizer.step()
                 d_l = f_loss.item()
-                numericLossDiscriminator = d_l 
+                numericLossDiscriminator = numericLossDiscriminator + d_l 
             for istep in range(nstepsgen):
                 generator_optimizer.zero_grad()
                 z_ = torch.tensor(np.random.normal(0, 1, (generatorInput.shape[0],latent_dim)), dtype=torch.float32, device=device)
@@ -89,11 +91,11 @@ if __name__=='__main__':
                 g_loss = -torch.mean(fakeEventCat)
                 g_loss.backward()
                 generator_optimizer.step()
-                numericLossGenerator = g_loss.item()
-        print('Epoch:', epoch, 'Generator loss:', numericLossGenerator, 'Discriminator loss:', numericLossDiscriminator)
+                numericLossGenerator = numericLossGenerator + g_loss.item()
+        print('Epoch:', epoch, 'Generator loss:', numericLossGenerator/nstepsgen, 'Discriminator loss:', numericLossDiscriminator/nstepsdis)
         epochs.append(epoch)
-        loss_gen.append(numericLossGenerator)
-        loss_disc.append(numericLossDiscriminator)
+        loss_gen.append(numericLossGenerator/nstepsgen)
+        loss_disc.append(numericLossDiscriminator/nstepsdis)
 
     torch.save(generator, 'generator.pt')
     torch.save(discriminator, 'discriminator.pt')
