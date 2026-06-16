@@ -75,7 +75,7 @@ class FullTracker:
                     trajState = newTrajStateModule
                 else:
                     trajState = minTrajState
-                nextLayers = minLayer.connections
+                nextLayers = minLayer.connections 
             else:
                 break
 

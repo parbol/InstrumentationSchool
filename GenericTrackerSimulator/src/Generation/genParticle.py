@@ -80,3 +80,8 @@ class genParticle:
         z = vZ * t + self.z
       
         return x, y, z
+    
+    def print(self):
+
+        logging.info(f'Particle at: ({self.x}, {self.y}, {self.z}) with phi: {self.phi}, eta: {self.eta}, pt: {self.pt}, id: {self.id}, charge: {self.q}')
+        

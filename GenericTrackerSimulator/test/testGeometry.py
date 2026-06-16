@@ -81,6 +81,7 @@ if __name__=='__main__':
     particle['label'] = []
 
     while counter < nParticles:
+        logging.info(f'Processing particle number: {counter}')
         x = y = z = t = 0
         phi = np.random.uniform(0.0, 2.0*np.pi)
         eta = np.random.uniform(-0.5, 0.5)
@@ -89,11 +90,12 @@ if __name__=='__main__':
         charge = np.sign(np.random.uniform(-1.0, 1.0))
         id = 121
         p =  genParticle(x = x, y = y, z = z, t = t, phi = phi, eta = eta, pt = pt, mass = mass, q=charge, id = id)
+        p.print()
         gBuilder.ftr.propagateParticle(p)
         if len(p.layerIntersections) != nLayers or len(p.intersections) != nLayers:
             continue
+        
         for i, ts in enumerate(p.layerIntersections):
-            print(i)
             mod = p.intersections[i][0]
             particle['particle'].append(counter)
             particle['x'].append(ts.x)

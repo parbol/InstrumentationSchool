@@ -58,7 +58,10 @@ class DataBuilder:
                     node2 = row2['label']
                     uprow.append(node1)
                     downrow.append(node2)
-                    weight.append(0.5)
+                    if row['particle'] == row2['particle']:
+                        weight.append(1.0)
+                    else:
+                        weight.append(0.0)
         
         
         edge_index = torch.tensor([uprow, downrow], dtype=torch.long)

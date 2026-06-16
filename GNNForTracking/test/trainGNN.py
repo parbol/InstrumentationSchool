@@ -10,9 +10,48 @@ import sys
 from GNNForTracking.src.GNNModel import GNNModel
 from GNNForTracking.src.DataBuilder import DataBuilder
 from torch_geometric.nn import to_hetero
+from GenericTrackerSimulator.src.Geometry.FullTracker import FullTracker
+from GenericTrackerSimulator.src.Geometry.Tracker import Tracker
+from GenericTrackerSimulator.src.Geometry.BarrelLayer import BarrelLayer
+from GenericTrackerSimulator.src.Geometry.EndcapDisk import EndcapDisk
+from GenericTrackerSimulator.src.Geometry.GeometryBuilder import GeometryBuilder
+from GenericTrackerSimulator.src.Geometry.GeometryTools import GeometryTools
+from GenericTrackerSimulator.src.Generation.genParticle import genParticle
 
 
+def drawPoints(ax1, ax2, ax3, ax4, data, res):
 
+    points = data.x_dict['source'].cpu().detach().numpy()
+    edges = data['source', 'target'].edge_index.cpu().detach().numpy()
+
+    x = points[:,0]
+    y = points[:,1]
+    z = points[:,2]
+    
+    ax2.plot(x, y, 'g*', markersize=5)
+    ax1.plot3D(x, z, y, 'g*', markersize=5)
+    ax3.plot(z, y, 'g*', markersize=5)
+    ax4.plot(z, x, 'g*', markersize=5)
+
+
+    for j, i in enumerate(res.itertuples()):
+        if i.weight > 0.9:
+            p1 = edges[0][j]
+            p2 = edges[1][j]
+            theX = np.asarray([x[p1], x[p2]])
+            theY = np.asarray([y[p1], y[p2]])
+            theZ = np.asarray([z[p1], z[p2]])
+            ax2.plot(theX, theY, 'r-')
+            ax1.plot3D(theX, theZ, theY, 'r-')
+            ax3.plot(theZ, theY, 'r-')
+            ax4.plot(theZ, theX, 'r-')         
+    
+    ax2.plot(x, y, 'g*', markersize=5)
+    ax1.plot3D(x, z, y, 'g*', markersize=5)
+    ax3.plot(z, y, 'g*', markersize=5)
+    ax4.plot(z, x, 'g*', markersize=5)
+
+    
 
 if __name__ == "__main__":
 
@@ -42,6 +81,9 @@ if __name__ == "__main__":
     # Actual training
     train_data = train_data.to(device)
     val_data = val_data.to(device)
+  
+    #print(train_data['source', 'target'].edge_index)
+    #sys.exit()
 
     theTrainLoss = 0
     theValLoss = 0
@@ -71,7 +113,6 @@ if __name__ == "__main__":
         test_data = test_data.to(device)
         pred = model(test_data.x_dict, test_data.edge_index_dict,
                      test_data['source', 'target'].edge_index)
-        print(pred.shape)
         pred = pred.clamp(min=0, max=1)
         target = test_data['source', 'target'].edge_label.float()
         rmse = F.mse_loss(pred, target).sqrt()
@@ -81,9 +122,7 @@ if __name__ == "__main__":
     tar = test_data['source', 'target'].edge_index[1].cpu().numpy()
     pred = pred.cpu().numpy()
     target = target.cpu().numpy()
-    print('---pred', pred)
     res=pd.DataFrame({'source': sour, 'target': tar, 'pred': pred, 'compare': target})
-    print(res.shape)
 
     #Add a new column if pred is greater or equal than 0.5 then 1 else 0.5
     res['weight'] = np.where(res['pred']>=0.5, 1., 0.)
@@ -120,3 +159,36 @@ if __name__ == "__main__":
 
     print(f'Accuracy in connected edges:     {n2}/{ncon} = {connected_accuracy}')
     print(f'Accuracy in non connected edges: {n1}/{nncon} = {nonconnected_accuracy}')
+
+    gBuilder = GeometryBuilder()
+    #If we want to generate a geometry from Geometry Builder
+    gBuilder.build()
+    gTools = GeometryTools(gBuilder.ftr)
+    #gTools.exportGeometry('tracker.json')
+    #sys.exit()
+       
+    fig = plt.figure(figsize = (8, 8), layout="constrained")
+    gs0 = fig.add_gridspec(2, 1, height_ratios=[2,1])
+    ax1 = fig.add_subplot(gs0[0], projection = '3d')
+    gs1 = gs0[1].subgridspec(1,3)
+    ax2 = fig.add_subplot(gs1[0])
+    ax3 = fig.add_subplot(gs1[1])
+    ax4 = fig.add_subplot(gs1[2])
+    ax1.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+    ax1.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+    ax1.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+    ax1.set_xlabel('x [cm]')
+    ax1.set_ylabel('z [cm]')
+    ax1.set_zlabel('y [cm]')
+    ax2.set_xlabel('x [cm]')
+    ax2.set_ylabel('y [cm]')
+    ax3.set_xlabel('z [cm]')
+    ax3.set_ylabel('y [cm]')
+    ax4.set_xlabel('z [cm]')
+    ax4.set_ylabel('x [cm]')
+
+    gBuilder.ftr.drawBarrel(ax1, ax2, ax3, ax4, t='b--')
+
+    drawPoints(ax1, ax2, ax3, ax4, test_data, res)
+
+    plt.show()

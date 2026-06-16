@@ -82,7 +82,7 @@ class Plane:
             return A * x + B * y + C * z + D
         
     
-        t_min = 0.0
+        t_min = 0.01
         step = 0.01 
         tl = t_min + step
         t_max = 30.0
