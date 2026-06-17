@@ -11,7 +11,7 @@ import logging
 import json
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', encoding='utf-8', level=logging.INFO)
+logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', encoding='utf-8', level=logging.INFO, filename='logs.log')
 
 
 
@@ -48,6 +48,7 @@ class GeometryTools:
         with open(filename) as json_data:
             info = json.load(json_data)
     
+
         for tr in info['trackers']:
 
             tracker = Tracker(tr['barrelMinR'], tr['barrelMaxR'], tr['barrelLZ'],
@@ -66,7 +67,7 @@ class GeometryTools:
                     euler.setFromVectors(vx, vy, vz)
                     tra = Tray(tray['x'], tray['y'], tray['z'], euler,
                                 tray['TrayWidth'], tray['TrayLength'])
-                     
+                    blayer.addTray(tra, -1)                     
                     for m in tray['Modules']:
                     
                         eulerM = EulerRotation(0.0, 0.0, 0.0)
@@ -77,7 +78,6 @@ class GeometryTools:
                         mod = Module(m['x'], m['y'], m['z'], m['Lx'],
                                      m['Ly'], eulerM)
                         tra.addModule(mod)
-                    blayer.addTray(tra, -1)
                 
                 for tray in bl['pTrays']:
                     
@@ -89,6 +89,7 @@ class GeometryTools:
                     tra = Tray(tray['x'], tray['y'], tray['z'], euler,
                                 tray['TrayWidth'], tray['TrayLength'])
                      
+                    blayer.addTray(tra, 1)
                     for m in tray['Modules']:
                         eulerM = EulerRotation(0.0, 0.0, 0.0)
                         vxm = np.asarray([m['vx0'], m['vx1'], m['vx2']])
@@ -98,7 +99,7 @@ class GeometryTools:
                         mod = Module(m['x'], m['y'], m['z'], m['Lx'],
                                      m['Ly'], eulerM)
                         tra.addModule(mod)
-                    blayer.addTray(tra, 1)
+                    
 
                 tracker.addBarrelLayer(blayer)
 
@@ -114,7 +115,7 @@ class GeometryTools:
                     euler.setFromVectors(vx, vy, vz)
                     tra = Tray(tray['x'], tray['y'], tray['z'], euler,
                                 tray['TrayWidth'], tray['TrayLength'])
-                     
+                    edisk.addTray(tra)                     
                     for m in tray['Modules']:
                         eulerM = EulerRotation(0.0, 0.0, 0.0)
                         vxm = np.asarray([m['vx0'], m['vx1'], m['vx2']])
@@ -124,7 +125,6 @@ class GeometryTools:
                         mod = Module(m['x'], m['y'], m['z'], m['Lx'],
                                      m['Ly'], eulerM)
                         tra.addModule(mod)
-                    edisk.addTray(tra)
                 
                 tracker.addEndcapDisk(edisk) 
       
@@ -141,7 +141,7 @@ class GeometryTools:
                     euler.setFromVectors(vx, vy, vz)
                     tra = Tray(tray['x'], tray['y'], tray['z'], euler,
                                 tray['TrayWidth'], tray['TrayLength'])
-                     
+                    edisk.addTray(tra)                     
                     for m in tray['Modules']:
                         eulerM = EulerRotation(0.0, 0.0, 0.0)
                         vxm = np.asarray([m['vx0'], m['vx1'], m['vx2']])
@@ -151,7 +151,6 @@ class GeometryTools:
                         mod = Module(m['x'], m['y'], m['z'], m['Lx'],
                                      m['Ly'], eulerM)
                         tra.addModule(mod)
-                    edisk.addTray(tra)
                 
                 tracker.addEndcapDisk(edisk) 
 

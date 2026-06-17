@@ -68,7 +68,7 @@ class navigation:
             nextPEndcap2 = [tr+1, 0, 1]
             nextNEndcap2 = [tr+1, 0, -1]
             myself = [tr, layer, sys]
-            previus = [tr, layer-1, 0]
+            previous = [tr, layer-1, 0]
             self.trackers[tr].barrelLayers[layer].connections.append(nextBarrel)
             self.trackers[tr].barrelLayers[layer].connections.append(nextPEndcap)
             self.trackers[tr].barrelLayers[layer].connections.append(nextNEndcap)

@@ -5,7 +5,7 @@ import math
 import sys
 import logging
 logger = logging.getLogger(__name__)
-logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', encoding='utf-8', level=logging.INFO)
+logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', encoding='utf-8', level=logging.INFO, filename='logs.log')
 
 
 
@@ -100,7 +100,14 @@ class Tray:
             m.draw(ax1, ax2, ax3, ax4, t, alpha)
 
              
-
+    ########################################################################################################
+    def print(self):
+        
+        logging.info(f'Tray with tracker index {self.trackerIndex}, barrel index {self.barrelIndex}, disk index {self.diskIndex}, and tray index {self.trayIndex}')
+        for t in self.modules:
+            t.print()
+    
+        
 
 
 

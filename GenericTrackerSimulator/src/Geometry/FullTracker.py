@@ -8,7 +8,7 @@ from GenericTrackerSimulator.src.Propagation.Propagator import Propagator
 from GenericTrackerSimulator.src.Generation.genParticle import genParticle
 import logging
 logger = logging.getLogger(__name__)
-logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', encoding='utf-8', level=logging.INFO)
+logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', encoding='utf-8', level=logging.INFO, filename='logs.log')
 
 
 class FullTracker:
@@ -100,4 +100,10 @@ class FullTracker:
             tr.drawEndcaps(ax1, ax2, ax3, ax4, t, alpha)
        
     
-   
+    ########################################################################################################
+    def print(self):
+        
+        for i, t in enumerate(self.trackers):
+            logging.info(f'Tracker {i}')
+            t.print()
+            

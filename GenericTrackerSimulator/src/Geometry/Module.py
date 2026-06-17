@@ -78,3 +78,10 @@ class Module:
         ax2.plot(x_start, y_start, t, alpha=alpha)
         ax3.plot(z_start, y_start, t, alpha=alpha)
         ax4.plot(z_start, x_start, t, alpha=alpha)
+
+
+    ########################################################################################################
+    def print(self):
+        
+        logging.info(f'Module with tracker index {self.trackerIndex}, barrel index {self.barrelIndex}, disk index {self.diskIndex}, tray index {self.trayIndex}, and {self.moduleIndex}')
+       
