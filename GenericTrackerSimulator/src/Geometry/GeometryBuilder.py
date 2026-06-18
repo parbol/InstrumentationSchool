@@ -72,14 +72,14 @@ class GeometryBuilder:
     
             # Building the layer
             bLayer = BarrelLayer(radius=r, Lz = Lz, X0 = X0, index=i)
-            
+            tr.addBarrelLayer(bLayer)
             # Building trays in the layer
             self.makeTraysAllAround(bLayer, phiShift = phiShift, NPhiTray = NPhiTray, 
                                       PhiTraySize = PhiTraySize, zShift = zShift, 
                                       NZTray = NZTray, ZTraySize = ZTraySize,
                                       nWGap = nWGap, nLGap= nLGap,
                                       wSizeModule = wSizeModule, lSizeModule = lSizeModule)
-            tr.addBarrelLayer(bLayer)
+            
 
 
         #################################################################################
@@ -104,15 +104,15 @@ class GeometryBuilder:
             wSizeModule = 2
             lSizeModule = 2
             diskp = EndcapDisk(radius=r, z=z, X0=X0, index=i)
+            tr.addEndcapDisk(diskp)
             self.makeTraysInDisk(disk=diskp, xShift=xShift, yShift = yShift, NXTray=NXTray, xTraySize = xTraySize, 
                                  nWGap=nWGap, nLGap=nLGap,
                                  wSizeModule=wSizeModule, lSizeModule=lSizeModule)
-            tr.addEndcapDisk(diskp)
             diskm = EndcapDisk(radius=r, z=-z, X0=X0, index=i)
+            tr.addEndcapDisk(diskm)
             self.makeTraysInDisk(disk=diskm, xShift=xShift, yShift = yShift, NXTray=NXTray, xTraySize = xTraySize, 
                                  nWGap=nWGap, nLGap=nLGap,
                                  wSizeModule=wSizeModule, lSizeModule=lSizeModule)
-            tr.addEndcapDisk(diskm)
             
         self.ftr.addTracker(tr)
 

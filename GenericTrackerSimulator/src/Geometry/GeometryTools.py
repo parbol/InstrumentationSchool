@@ -238,7 +238,7 @@ class GeometryTools:
        
         trays = dict()
         trays['trackerIndex'] = tray.trackerIndex
-        trays['barrelIndex'] = tray.trackerIndex
+        trays['barrelIndex'] = tray.barrelIndex
         trays['diskIndex'] = tray.diskIndex
         trays['trayIndex'] = tray.trayIndex
         trays['type'] = tray.type
@@ -272,7 +272,7 @@ class GeometryTools:
           
         module = dict()
         module['trackerIndex'] = m.trackerIndex
-        module['barrelIndex'] = m.trackerIndex
+        module['barrelIndex'] = m.barrelIndex
         module['diskIndex'] = m.diskIndex
         module['trayIndex'] = m.trayIndex
         module['moduleIndex'] = m.moduleIndex

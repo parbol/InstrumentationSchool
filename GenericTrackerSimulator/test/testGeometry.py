@@ -34,12 +34,13 @@ if __name__=='__main__':
     #gBuilder.build()
     #gTools = GeometryTools(gBuilder.ftr)
     #gTools.exportGeometry('tracker.json')
-    #sys.exit()
+    
 
     gTools = GeometryTools(gBuilder.ftr)
     gTools.importGeometry('tracker.json')
+    
     gBuilder.ftr.setNavigator()
-    gBuilder.ftr.print()
+   
 
    
     #Some global variables

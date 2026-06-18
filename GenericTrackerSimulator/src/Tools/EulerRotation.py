@@ -87,32 +87,32 @@ class EulerRotation():
             sinphi = A[2,0]/np.sin(theta)
             cosphi = -A[2,1]/np.sin(theta)
             if sinphi >= 0:
-                phi = self.arccos(cosphi)
+                phi = self.arcos(cosphi)
             else:
-                phi = -self.arccos(cosphi)
+                phi = -self.arcos(cosphi)
             sinpsi = A[0,2]/np.sin(theta)
             cospsi = A[1,2]/np.sin(theta)
             if sinpsi >= 0:
-                psi = self.arccos(cospsi)
+                psi = self.arcos(cospsi)
             else:
-                psi = -self.arccos(cospsi)
+                psi = -self.arcos(cospsi)
         else:
             if np.cos(theta) >= 0:
                 if A[0,1] > 0:
-                    psi = self.arccos(A[0,0])
+                    psi = self.arcos(A[0,0])
                     theta = 0.0
                     phi = 0.0
                 else:
-                    psi = -self.arccos(A[0,0])
+                    psi = -self.arcos(A[0,0])
                     theta = 0.0
                     phi = 0.0   
             else:
                 if A[0,1] > 0:
-                    psi = -self.arccos(A[0,0])
+                    psi = -self.arcos(A[0,0])
                     theta = np.pi
                     phi = 0.0   
                 else:
-                    psi = self.arccos(A[0,0])
+                    psi = self.arcos(A[0,0])
                     theta = np.pi
                     phi = 0.0   
         psi = self.makePositive(psi)
@@ -124,8 +124,8 @@ class EulerRotation():
     def arcos(self, cos):
 
         if cos > 1.0:
-            return np.arcos(1.0)
+            return np.acos(1.0)
         elif cos < -1.0:
-            return np.arcos(-1)
+            return np.acos(-1)
         else:
-            return np.arcos(cos)
+            return np.acos(cos)
