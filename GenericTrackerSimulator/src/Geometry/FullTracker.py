@@ -60,7 +60,7 @@ class FullTracker:
                     layer = self.trackers[l[0]].mEndcapDisks[l[1]]
                 
                 newTrajState, validT = self.propagator.propagate(trajState, layer)
-               
+                print('layer tried', layer.barrelIndex, layer.diskIndex)
                 if validT:
                     valid = True
                     if newTrajState.t >= 0.0 and newTrajState.t < mint:
@@ -68,6 +68,7 @@ class FullTracker:
                         minLayer = layer
                         minTrajState = newTrajState
             if minLayer != None:
+                print('MinLayer with', minLayer.barrelIndex, minLayer.diskIndex, 'actually worked')
                 particle.layerIntersections.append(minTrajState)           
                 m, newTrajStateModule, validModule = self.propagator.finePropagation(trajState, minLayer)
                 if validModule:
