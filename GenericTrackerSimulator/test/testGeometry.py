@@ -31,13 +31,13 @@ if __name__=='__main__':
 
     gBuilder = GeometryBuilder()
     #If we want to generate a geometry from Geometry Builder
-    #gBuilder.build()
+    gBuilder.build()
     #gTools = GeometryTools(gBuilder.ftr)
     #gTools.exportGeometry('tracker.json')
     
 
-    gTools = GeometryTools(gBuilder.ftr)
-    gTools.importGeometry('tracker.json')
+    #gTools = GeometryTools(gBuilder.ftr)
+    #gTools.importGeometry('tracker.json')
     
     gBuilder.ftr.setNavigator()
    

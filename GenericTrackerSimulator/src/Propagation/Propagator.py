@@ -122,6 +122,18 @@ class Propagator:
         finalY = R * (np.cos(w*finalT - ts.phi) - np.cos(ts.phi)) + y0
         finalZ = ts.vZ * finalT + z0
         finalT = finalT + t0
+        
+        if layer.barrelIndex != -1:
+
+            if finalZ > layer.Lz/2.0 or finalZ < -layer.Lz/2.0:
+                return None, False
+            
+        if layer.diskIndex != -1:
+
+            finalR = np.sqrt(finalX**2+finalY**2)
+            if layer.R < finalR:
+                return None, False
+            
         # Build new trajectoy State
         newTs = trajectoryState(x = finalX, y = finalY, z = finalZ, t = finalT, phi = finalPhi, eta = ts.eta, E = ts.E, q = ts.q, beta = ts.beta)
 
